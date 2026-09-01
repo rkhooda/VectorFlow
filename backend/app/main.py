@@ -5,7 +5,7 @@ Run with: uvicorn backend.app.main:app --port 8000
 
 from fastapi import FastAPI
 
-from backend.app.api import session
+from backend.app.api import results, session
 from backend.app.core.config import get_config
 
 APP_VERSION = "0.1.0"
@@ -25,9 +25,7 @@ def create_app() -> FastAPI:
         return {"status": "ok", "version": APP_VERSION}
 
     app.include_router(session.router)
-
-    # Phase 3+: state, forecast, stage, explanation and flow routers are
-    # registered here (see docs/implementation-plan.md).
+    app.include_router(results.router)
 
     return app
 
