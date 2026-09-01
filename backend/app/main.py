@@ -5,6 +5,7 @@ Run with: uvicorn backend.app.main:app --port 8000
 
 from fastapi import FastAPI
 
+from backend.app.api import session
 from backend.app.core.config import get_config
 
 APP_VERSION = "0.1.0"
@@ -23,8 +24,10 @@ def create_app() -> FastAPI:
         get_config()  # fail fast if config.yaml is missing or invalid
         return {"status": "ok", "version": APP_VERSION}
 
-    # Phase 2+: session, state, forecast, stage, explanation and flow routers
-    # are registered here (see docs/implementation-plan.md).
+    app.include_router(session.router)
+
+    # Phase 3+: state, forecast, stage, explanation and flow routers are
+    # registered here (see docs/implementation-plan.md).
 
     return app
 

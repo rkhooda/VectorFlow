@@ -11,6 +11,15 @@ data:
   samples_dir: data/samples
   uploads_dir: data/uploads
 
+session:
+  max_upload_mb: 50
+  allowed_extensions: [.csv, .pcap, .pcapng]
+
+# passed to the module entry points (docs/integration.md)
+modules:
+  mock_windows: 20
+  mock_horizon: 5
+
 replay:
   # seconds of wall-clock time per network-state time window during replay
   seconds_per_window: 2
