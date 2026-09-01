@@ -1,0 +1,32 @@
+"""SIH26153 backend — FastAPI application entry point.
+
+Run with: uvicorn backend.app.main:app --port 8000
+"""
+
+from fastapi import FastAPI
+
+from backend.app.core.config import get_config
+
+APP_VERSION = "0.1.0"
+
+
+def create_app() -> FastAPI:
+    app = FastAPI(
+        title="SIH26153 Attack Forecasting API",
+        version=APP_VERSION,
+        docs_url="/api/docs",
+        openapi_url="/api/openapi.json",
+    )
+
+    @app.get("/api/health")
+    def health() -> dict:
+        get_config()  # fail fast if config.yaml is missing or invalid
+        return {"status": "ok", "version": APP_VERSION}
+
+    # Phase 2+: session, state, forecast, stage, explanation and flow routers
+    # are registered here (see docs/implementation-plan.md).
+
+    return app
+
+
+app = create_app()
