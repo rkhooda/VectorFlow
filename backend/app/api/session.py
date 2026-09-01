@@ -4,9 +4,9 @@ from pathlib import Path
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
-from backend.app.core import orchestrator, store
+from backend.app.core import orchestrator, replay, store
 from backend.app.core.config import REPO_ROOT, get_config
-from contracts import SessionStatus
+from contracts import SessionState, SessionStatus
 
 router = APIRouter(prefix="/api/session", tags=["session"])
 
@@ -48,4 +48,6 @@ async def create_session(
 def session_status() -> SessionStatus:
     if store.current is None:
         raise HTTPException(404, "no session yet — POST /api/session first")
+    if store.current.status.state in (SessionState.replaying, SessionState.completed):
+        replay.advance(store.current, get_config()["replay"]["seconds_per_window"])
     return store.current.status

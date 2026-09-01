@@ -9,8 +9,10 @@ from contracts import ForecastResult, IntelligenceResult, NetworkState, SessionS
 class Session:
     status: SessionStatus
     states: list[NetworkState] = field(default_factory=list)
-    forecast: ForecastResult | None = None
-    intelligence: IntelligenceResult | None = None
+    # index i → result computed on the windows seen up to and including i
+    forecasts: list[ForecastResult] = field(default_factory=list)
+    intelligence: list[IntelligenceResult] = field(default_factory=list)
+    replay_started: float = 0.0  # time.monotonic() when replay began
 
 
 # ponytail: single module-level session — one analysis at a time is all the

@@ -4,6 +4,7 @@ Currently wired to the mocks; Phase 5 swaps each call for the real module
 (docs/implementation-plan.md).
 """
 
+import time
 import uuid
 from pathlib import Path
 
@@ -24,14 +25,18 @@ def run(input_path: Path, module_config: dict) -> store.Session:
     store.current = session
     try:
         session.states = mocks.process(input_path, module_config)
-        session.forecast = mocks.forecast(session.states, module_config)
-        session.intelligence = mocks.analyze(
-            session.states, session.forecast, module_config
-        )
-        session.status.total_windows = len(session.states)
-        session.status.current_window = len(session.states)
-        session.status.state = SessionState.completed
-        session.status.detail = "analysis complete"
+        # precompute results per replay position so result endpoints only index
+        for i in range(1, len(session.states) + 1):
+            seen = session.states[:i]
+            forecast = mocks.forecast(seen, module_config)
+            session.forecasts.append(forecast)
+            session.intelligence.append(mocks.analyze(seen, forecast, module_config))
+        total = len(session.states)
+        session.status.total_windows = total
+        session.status.current_window = 1
+        session.status.state = SessionState.replaying
+        session.status.detail = f"replaying window 1/{total}"
+        session.replay_started = time.monotonic()
     except Exception as exc:  # module code is a trust boundary — never crash the API
         session.status.state = SessionState.error
         session.status.detail = f"analysis failed: {exc}"
