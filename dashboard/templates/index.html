@@ -31,4 +31,20 @@
   <p id="ns-detail" class="muted"></p>
 </section>
 
+<section id="attack-risk" class="card">
+  <h2>Attack risk</h2>
+  <div id="risk-value">—</div>
+  <p><span id="risk-severity" class="pill">no data</span></p>
+  <p class="muted">Probability of network infiltration at the current replay position
+    (<span id="risk-model">—</span>).</p>
+</section>
+
+<section id="forecast-timeline" class="card wide">
+  <h2>Live forecast timeline</h2>
+  <svg id="timeline-svg" viewBox="0 0 720 200" preserveAspectRatio="none" role="img"
+       aria-label="Attack probability over the replay timeline"></svg>
+  <p class="muted">Solid line: observed windows so far. Dashed line: forecast horizon
+    from the current position. Hover a point for its value.</p>
+</section>
+
 {% endblock %}

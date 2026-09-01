@@ -173,8 +173,70 @@ function recordObserved(status, forecast) {
   }
 }
 
-function renderRisk() {}
-function renderTimeline() {}
+// presentation thresholds only — the prediction itself comes from the backend
+const SEVERITIES = [
+  [0.25, "Low", "low"],
+  [0.5, "Moderate", "moderate"],
+  [0.75, "High", "high"],
+  [1.01, "Critical", "critical"],
+];
+
+function renderRisk(forecast) {
+  const p = forecast.infiltration_probability;
+  $("risk-value").textContent = `${(p * 100).toFixed(1)}%`;
+  const [, label, cls] = SEVERITIES.find(([bound]) => p < bound);
+  const pill = $("risk-severity");
+  pill.textContent = `${label} risk`;
+  pill.className = `pill ${cls}`;
+  $("risk-model").textContent = forecast.model_name;
+}
+
+/* Single-hue line chart: observed windows (solid) + forecast horizon (dashed).
+   Native <title> tooltips on the points; recessive gridlines. */
+function renderTimeline(forecast, status) {
+  const svg = $("timeline-svg");
+  const observed = state.observed;
+  if (!observed.length) return;
+
+  const horizon = forecast.horizon || [];
+  const lastX = status.total_windows + horizon.length;
+  const W = 720, H = 200, PAD_L = 34, PAD_R = 8, PAD_T = 10, PAD_B = 22;
+  const x = (w) => PAD_L + ((w - 1) / Math.max(lastX - 1, 1)) * (W - PAD_L - PAD_R);
+  const y = (p) => PAD_T + (1 - p) * (H - PAD_T - PAD_B);
+
+  const parts = [];
+  // gridlines + y labels at 0 / 0.5 / 1
+  for (const g of [0, 0.5, 1]) {
+    parts.push(`<line x1="${PAD_L}" y1="${y(g)}" x2="${W - PAD_R}" y2="${y(g)}" stroke="#e5e7eb"/>`);
+    parts.push(`<text x="${PAD_L - 6}" y="${y(g) + 4}" text-anchor="end" font-size="10" fill="#888">${g * 100}%</text>`);
+  }
+  // "now" marker at the current window
+  const nowX = x(status.current_window);
+  parts.push(`<line x1="${nowX}" y1="${PAD_T}" x2="${nowX}" y2="${H - PAD_B}" stroke="#bbb" stroke-dasharray="2 3"/>`);
+  parts.push(`<text x="${nowX + 4}" y="${PAD_T + 10}" font-size="10" fill="#888">now</text>`);
+  parts.push(`<text x="${PAD_L}" y="${H - 6}" font-size="10" fill="#888">window 1</text>`);
+  parts.push(`<text x="${W - PAD_R}" y="${H - 6}" text-anchor="end" font-size="10" fill="#888">+${horizon.length} forecast</text>`);
+
+  const pts = observed.map((o) => `${x(o.window)},${y(o.probability)}`);
+  parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="#3b6ff0" stroke-width="2"/>`);
+
+  const last = observed[observed.length - 1];
+  const fpts = [`${x(last.window)},${y(last.probability)}`].concat(
+    horizon.map((h, i) => `${x(last.window + i + 1)},${y(h.probability)}`)
+  );
+  parts.push(`<polyline points="${fpts.join(" ")}" fill="none" stroke="#3b6ff0" stroke-width="2" stroke-dasharray="5 4" opacity="0.7"/>`);
+
+  for (const o of observed) {
+    parts.push(`<circle cx="${x(o.window)}" cy="${y(o.probability)}" r="3" fill="#3b6ff0">` +
+      `<title>window ${o.window}: ${(o.probability * 100).toFixed(1)}%</title></circle>`);
+  }
+  horizon.forEach((h, i) => {
+    parts.push(`<circle cx="${x(last.window + i + 1)}" cy="${y(h.probability)}" r="3" fill="#fff" stroke="#3b6ff0" stroke-width="1.5">` +
+      `<title>forecast +${h.step}: ${(h.probability * 100).toFixed(1)}%</title></circle>`);
+  });
+
+  svg.innerHTML = parts.join("");
+}
 function renderStage() {}
 function renderExplanations() {}
 function renderFlagged() {}
