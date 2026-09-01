@@ -237,8 +237,54 @@ function renderTimeline(forecast, status) {
 
   svg.innerHTML = parts.join("");
 }
-function renderStage() {}
-function renderExplanations() {}
+function renderStage(stage) {
+  $("stage-name").textContent = stage.tactic_name;
+  $("stage-id").textContent = `(${stage.tactic_id})`;
+  $("stage-confidence").textContent = `${(stage.confidence * 100).toFixed(0)}%`;
+
+  const trail = state.stageTrail;
+  if (trail[trail.length - 1] !== stage.tactic_name) trail.push(stage.tactic_name);
+  const ol = $("stage-trail");
+  ol.replaceChildren(...trail.map((name, i) => {
+    const li = document.createElement("li");
+    li.textContent = name;
+    if (i === trail.length - 1) li.className = "current";
+    return li;
+  }));
+}
+
+// horizontal bar rows: [{name, value, display}] scaled to the largest |value|
+function barRows(container, rows) {
+  const max = Math.max(...rows.map((r) => Math.abs(r.value)), 1e-9);
+  container.replaceChildren(...rows.map((r) => {
+    const row = document.createElement("div");
+    row.className = "bar-row";
+    const name = document.createElement("span");
+    name.className = "name";
+    name.textContent = r.name;
+    name.title = r.name;
+    const track = document.createElement("div");
+    track.className = "bar-track";
+    const fill = document.createElement("div");
+    fill.className = "bar-fill";
+    fill.style.width = `${(Math.abs(r.value) / max) * 100}%`;
+    track.appendChild(fill);
+    const val = document.createElement("span");
+    val.className = "val";
+    val.textContent = r.display;
+    row.append(name, track, val);
+    return row;
+  }));
+}
+
+function renderExplanations(expl) {
+  $("expl-summary").textContent = expl.summary;
+  barRows($("expl-features"), expl.top_features.map((f) => ({
+    name: f.feature,
+    value: f.contribution,
+    display: (f.contribution >= 0 ? "+" : "") + f.contribution.toFixed(3),
+  })));
+}
 function renderFlagged() {}
 function renderTraffic() {}
 
