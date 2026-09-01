@@ -61,4 +61,32 @@
   <div id="expl-features"></div>
 </section>
 
+<section id="traffic-summary" class="card">
+  <h2>Traffic summary</h2>
+  <dl class="kv">
+    <dt>Windows seen</dt><dd id="ts-windows">—</dd>
+    <dt>Flows</dt><dd id="ts-flows">—</dd>
+    <dt>Packets</dt><dd id="ts-packets">—</dd>
+    <dt>Bytes</dt><dd id="ts-bytes">—</dd>
+  </dl>
+  <h3 class="muted">Protocol breakdown</h3>
+  <div id="ts-protocols"></div>
+  <h3 class="muted">Top talkers (by bytes sent)</h3>
+  <ol id="ts-talkers"><li class="muted">no data yet</li></ol>
+</section>
+
+<section id="flagged-flows" class="card wide">
+  <h2>Flagged flows <span id="ff-count" class="pill">0</span></h2>
+  <p class="muted">Suspicious flows flagged so far in the replay, newest first.</p>
+  <table>
+    <thead>
+      <tr><th>Time</th><th>Source</th><th>Destination</th><th>Proto</th>
+          <th>Packets</th><th>Score</th><th>Reason</th></tr>
+    </thead>
+    <tbody id="ff-body">
+      <tr><td colspan="7" class="muted">no flagged flows yet</td></tr>
+    </tbody>
+  </table>
+</section>
+
 {% endblock %}

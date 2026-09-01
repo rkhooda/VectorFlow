@@ -285,8 +285,56 @@ function renderExplanations(expl) {
     display: (f.contribution >= 0 ? "+" : "") + f.contribution.toFixed(3),
   })));
 }
-function renderFlagged() {}
-function renderTraffic() {}
+function fmtBytes(n) {
+  if (n >= 1e9) return `${(n / 1e9).toFixed(2)} GB`;
+  if (n >= 1e6) return `${(n / 1e6).toFixed(2)} MB`;
+  if (n >= 1e3) return `${(n / 1e3).toFixed(1)} KB`;
+  return `${n} B`;
+}
+
+function renderFlagged(flows) {
+  $("ff-count").textContent = flows.length;
+  const body = $("ff-body");
+  if (!flows.length) return;
+  body.replaceChildren(...flows.slice().reverse().map((f) => {
+    const tr = document.createElement("tr");
+    const cells = [
+      new Date(f.flow.start_time).toLocaleTimeString(),
+      `${f.flow.src_ip}:${f.flow.src_port}`,
+      `${f.flow.dst_ip}:${f.flow.dst_port}`,
+      f.flow.protocol,
+      String(f.flow.packet_count),
+      f.score.toFixed(2),
+      f.reason,
+    ];
+    tr.replaceChildren(...cells.map((text, i) => {
+      const td = document.createElement("td");
+      td.textContent = text;
+      if (i === 4 || i === 5) td.className = "num";
+      return td;
+    }));
+    return tr;
+  }));
+}
+
+function renderTraffic(summary) {
+  $("ts-windows").textContent = summary.window_count;
+  $("ts-flows").textContent = summary.flow_count.toLocaleString();
+  $("ts-packets").textContent = summary.packet_count.toLocaleString();
+  $("ts-bytes").textContent = fmtBytes(summary.byte_count);
+
+  const protos = Object.entries(summary.protocol_counts).sort((a, b) => b[1] - a[1]);
+  barRows($("ts-protocols"), protos.map(([name, count]) => ({
+    name, value: count, display: count.toLocaleString(),
+  })));
+
+  const ol = $("ts-talkers");
+  ol.replaceChildren(...summary.top_talkers.map((ip) => {
+    const li = document.createElement("li");
+    li.textContent = ip;
+    return li;
+  }));
+}
 
 /* ---------- boot ---------- */
 
