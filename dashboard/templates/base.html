@@ -12,7 +12,7 @@
 <body>
   <header>
     <h1>SIH26153 — AI-based Network Attack Forecasting</h1>
-    <span id="backend-health" class="pill {{ 'ok' if backend.status == 'ok' else 'bad' }}">
+    <span id="backend-health" class="status-badge {{ 'ok' if backend.status == 'ok' else 'bad' }}">
       backend: {{ backend.status }}{% if backend.version %} v{{ backend.version }}{% endif %}
     </span>
   </header>

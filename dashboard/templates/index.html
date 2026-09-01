@@ -4,14 +4,16 @@
 <section id="controls" class="card">
   <h2>Input &amp; replay controls</h2>
   <form id="session-form">
-    <label>Sample capture:
+    <label class="field">
+      <span class="field-label">Sample capture</span>
       <select name="sample" id="sample-select">
         <option value="">— choose a sample —</option>
         {% for s in samples %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
       </select>
     </label>
     <span class="or">or</span>
-    <label>Upload CSV/PCAP:
+    <label class="field">
+      <span class="field-label">Upload CSV/PCAP</span>
       <input type="file" name="file" id="file-input" accept=".csv,.pcap,.pcapng">
     </label>
     <button type="submit" id="start-btn">Start analysis</button>
@@ -51,7 +53,7 @@
   <h2>Attack stage (MITRE ATT&amp;CK)</h2>
   <p><strong id="stage-name">—</strong> <span id="stage-id" class="muted"></span></p>
   <p class="muted">Confidence: <span id="stage-confidence">—</span></p>
-  <h3 class="muted">Progression this session</h3>
+  <h3 class="subhead">Progression this session</h3>
   <ol id="stage-trail"><li class="muted">no stages yet</li></ol>
 </section>
 
@@ -63,15 +65,15 @@
 
 <section id="traffic-summary" class="card">
   <h2>Traffic summary</h2>
-  <dl class="kv">
-    <dt>Windows seen</dt><dd id="ts-windows">—</dd>
-    <dt>Flows</dt><dd id="ts-flows">—</dd>
-    <dt>Packets</dt><dd id="ts-packets">—</dd>
-    <dt>Bytes</dt><dd id="ts-bytes">—</dd>
-  </dl>
-  <h3 class="muted">Protocol breakdown</h3>
+  <div class="metrics">
+    <div class="metric"><span class="metric-label">Windows seen</span><span class="metric-value" id="ts-windows">—</span></div>
+    <div class="metric"><span class="metric-label">Flows</span><span class="metric-value" id="ts-flows">—</span></div>
+    <div class="metric"><span class="metric-label">Packets</span><span class="metric-value" id="ts-packets">—</span></div>
+    <div class="metric"><span class="metric-label">Bytes</span><span class="metric-value" id="ts-bytes">—</span></div>
+  </div>
+  <h3 class="subhead">Protocol breakdown</h3>
   <div id="ts-protocols"></div>
-  <h3 class="muted">Top talkers (by bytes sent)</h3>
+  <h3 class="subhead">Top talkers (by bytes sent)</h3>
   <ol id="ts-talkers"><li class="muted">no data yet</li></ol>
 </section>
 
