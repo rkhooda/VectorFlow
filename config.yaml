@@ -1,0 +1,16 @@
+# SIH26153 application configuration (single source of truth, offline)
+backend:
+  host: 127.0.0.1
+  port: 8000
+
+dashboard:
+  host: 127.0.0.1
+  port: 5000
+
+data:
+  samples_dir: data/samples
+  uploads_dir: data/uploads
+
+replay:
+  # seconds of wall-clock time per network-state time window during replay
+  seconds_per_window: 2

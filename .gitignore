@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# Environment / secrets
+.env
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+
+# Runtime data & model artifacts
+data/uploads/
+*.pkl
+*.joblib
+*.onnx
+*.pt
+*.h5
