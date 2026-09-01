@@ -1,0 +1,108 @@
+/* Functional styling only — the UI/UX designer replaces this file later.
+   Generic building blocks: cards, key/value lists, pills, tables, bars. */
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font: 14px/1.5 system-ui, sans-serif;
+  color: #1a1a2e;
+  background: #f4f5f7;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+}
+header h1 { font-size: 18px; margin: 0; flex: 1; }
+
+main {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 14px;
+  padding: 14px 20px;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px 16px;
+  overflow-x: auto;
+}
+.card h2 { font-size: 14px; margin: 0 0 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #555; }
+
+.card.wide { grid-column: 1 / -1; }
+
+.muted { color: #777; font-size: 13px; }
+
+/* key/value list */
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 0; }
+.kv dt { color: #777; }
+.kv dd { margin: 0; font-variant-numeric: tabular-nums; }
+
+/* status pills — state/severity is always color + text, never color alone */
+.pill {
+  display: inline-block;
+  padding: 1px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  background: #e8e8ee;
+  color: #444;
+}
+.pill.ok        { background: #d9f2e3; color: #14532d; }
+.pill.bad       { background: #fde3e3; color: #7f1d1d; }
+.pill.active    { background: #dbeafe; color: #1e3a8a; }
+.pill.done      { background: #d9f2e3; color: #14532d; }
+.pill.low       { background: #d9f2e3; color: #14532d; }
+.pill.moderate  { background: #fef3c7; color: #78350f; }
+.pill.high      { background: #ffedd5; color: #7c2d12; }
+.pill.critical  { background: #fde3e3; color: #7f1d1d; }
+
+progress { width: 100%; height: 10px; }
+
+/* error banner */
+#error-banner {
+  margin: 10px 20px 0;
+  padding: 8px 14px;
+  border: 1px solid #f0b4b4;
+  border-radius: 6px;
+  background: #fde3e3;
+  color: #7f1d1d;
+}
+
+/* big risk number */
+#risk-value {
+  font-size: 44px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+/* tables (flagged flows, traffic) */
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { text-align: left; padding: 4px 10px 4px 0; border-bottom: 1px solid #eee; white-space: nowrap; }
+th { color: #777; font-weight: 600; }
+td.num { font-variant-numeric: tabular-nums; }
+
+/* horizontal value bars (features, protocols) */
+.bar-row { display: grid; grid-template-columns: 160px 1fr 56px; align-items: center; gap: 8px; margin: 3px 0; }
+.bar-row .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-track { background: #eef0f3; border-radius: 4px; height: 10px; }
+.bar-fill { background: #3b6ff0; border-radius: 4px; height: 10px; }
+.bar-row .val { text-align: right; font-variant-numeric: tabular-nums; color: #555; font-size: 12px; }
+
+/* forecast timeline svg */
+#timeline-svg { width: 100%; height: 200px; display: block; }
+
+/* stage trail */
+#stage-trail { display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 10px 0 0; list-style: none; }
+#stage-trail li { display: flex; align-items: center; gap: 6px; }
+#stage-trail li:not(:last-child)::after { content: "→"; color: #999; }
+#stage-trail .current { font-weight: 700; }

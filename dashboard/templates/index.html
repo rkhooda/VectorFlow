@@ -1,16 +1,34 @@
 {% extends "base.html" %}
 {% block content %}
-<p>Backend status: <strong>{{ backend.status }}</strong>
-   {% if backend.version %}(v{{ backend.version }}){% endif %}</p>
 
-<!-- Placeholder sections for the PS-required panels (Phase 4).
-     Structure only — the UI/UX designer will provide the actual design. -->
-<section id="replay-status"><h2>Input / replay status</h2></section>
-<section id="network-state"><h2>Current network state</h2></section>
-<section id="attack-probability"><h2>Attack probability</h2></section>
-<section id="forecast-timeline"><h2>Forecast timeline</h2></section>
-<section id="attack-stage"><h2>Predicted attack stage</h2></section>
-<section id="explanations"><h2>Contributing features / reasons</h2></section>
-<section id="flagged-flows"><h2>Flagged flows</h2></section>
-<section id="traffic-summary"><h2>Traffic summary</h2></section>
+<section id="controls" class="card">
+  <h2>Input &amp; replay controls</h2>
+  <form id="session-form">
+    <label>Sample capture:
+      <select name="sample" id="sample-select">
+        <option value="">— choose a sample —</option>
+        {% for s in samples %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+      </select>
+    </label>
+    <span class="or">or</span>
+    <label>Upload CSV/PCAP:
+      <input type="file" name="file" id="file-input" accept=".csv,.pcap,.pcapng">
+    </label>
+    <button type="submit" id="start-btn">Start analysis</button>
+  </form>
+  <p id="controls-msg" class="muted"></p>
+</section>
+
+<section id="network-status" class="card">
+  <h2>Network status</h2>
+  <dl class="kv">
+    <dt>Session</dt><dd id="ns-session">—</dd>
+    <dt>Input file</dt><dd id="ns-input">—</dd>
+    <dt>State</dt><dd><span id="ns-state" class="pill">no session</span></dd>
+    <dt>Replay window</dt><dd id="ns-window">—</dd>
+  </dl>
+  <progress id="ns-progress" max="1" value="0"></progress>
+  <p id="ns-detail" class="muted"></p>
+</section>
+
 {% endblock %}

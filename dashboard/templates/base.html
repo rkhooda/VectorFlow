@@ -1,18 +1,25 @@
 <!doctype html>
-<!-- Structural placeholder only. Visual design will be provided by the
-     UI/UX designer — do not add styling here yet. -->
+<!-- Functional layout only. The UI/UX designer's visual design replaces
+     static/css/style.css (and may restructure templates) without touching
+     routes, api_client, or static/js/dashboard.js. -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}SIH26153 — Attack Forecasting{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
   <header>
     <h1>SIH26153 — AI-based Network Attack Forecasting</h1>
+    <span id="backend-health" class="pill {{ 'ok' if backend.status == 'ok' else 'bad' }}">
+      backend: {{ backend.status }}{% if backend.version %} v{{ backend.version }}{% endif %}
+    </span>
   </header>
+  <div id="error-banner" hidden></div>
   <main>
     {% block content %}{% endblock %}
   </main>
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
 </html>
