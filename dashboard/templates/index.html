@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<p>Backend status: <strong>{{ backend.status }}</strong>
+   {% if backend.version %}(v{{ backend.version }}){% endif %}</p>
+
+<!-- Placeholder sections for the PS-required panels (Phase 4).
+     Structure only — the UI/UX designer will provide the actual design. -->
+<section id="replay-status"><h2>Input / replay status</h2></section>
+<section id="network-state"><h2>Current network state</h2></section>
+<section id="attack-probability"><h2>Attack probability</h2></section>
+<section id="forecast-timeline"><h2>Forecast timeline</h2></section>
+<section id="attack-stage"><h2>Predicted attack stage</h2></section>
+<section id="explanations"><h2>Contributing features / reasons</h2></section>
+<section id="flagged-flows"><h2>Flagged flows</h2></section>
+<section id="traffic-summary"><h2>Traffic summary</h2></section>
+{% endblock %}
