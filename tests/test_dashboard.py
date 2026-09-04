@@ -10,7 +10,6 @@ from backend.app.main import app as fastapi_app
 client = dashboard_app.app.test_client()
 
 PANEL_IDS = [
-    "controls",
     "network-status",
     "attack-risk",
     "forecast-timeline",
@@ -47,26 +46,34 @@ def backend_up(monkeypatch):
     store.current = None
 
 
-def test_index_loads_with_all_panels(monkeypatch):
+def test_index_shows_upload_form():
+    resp = client.get("/")
+    assert resp.status_code == 200
+    html = resp.get_data(as_text=True)
+    assert 'id="session-form"' in html
+    assert "sample_flows.csv" in html  # sample selector is populated
+    assert 'href="/dashboard"' in html
+
+
+def test_dashboard_loads_with_all_panels(monkeypatch):
     monkeypatch.setattr(
         dashboard_app.api_client,
         "backend_health",
         lambda: {"status": "ok", "version": "0.1.0"},
     )
-    resp = client.get("/")
+    resp = client.get("/dashboard")
     assert resp.status_code == 200
     html = resp.get_data(as_text=True)
     for panel in PANEL_IDS:
         assert f'id="{panel}"' in html
-    assert "sample_flows.csv" in html  # sample selector is populated
     assert "backend: ok" in html
 
 
-def test_index_survives_backend_down(monkeypatch):
+def test_dashboard_survives_backend_down(monkeypatch):
     monkeypatch.setattr(
         dashboard_app.api_client, "backend_health", lambda: {"status": "unreachable"}
     )
-    resp = client.get("/")
+    resp = client.get("/dashboard")
     assert resp.status_code == 200
     assert "backend: unreachable" in resp.get_data(as_text=True)
 

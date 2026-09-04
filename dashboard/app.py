@@ -45,9 +45,12 @@ def list_samples() -> list[str]:
 
 @app.route("/")
 def index():
-    return render_template(
-        "index.html", backend=api_client.backend_health(), samples=list_samples()
-    )
+    return render_template("index.html", samples=list_samples())
+
+
+@app.route("/dashboard")
+def dashboard():
+    return render_template("dashboard.html", backend=api_client.backend_health())
 
 
 @app.route("/api/<path:path>")

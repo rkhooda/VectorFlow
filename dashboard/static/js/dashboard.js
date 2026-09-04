@@ -35,44 +35,6 @@ function showError(msg) {
 }
 function clearError() { $("error-banner").hidden = true; }
 
-/* ---------- session start ---------- */
-
-function initControls() {
-  $("session-form").addEventListener("submit", async (ev) => {
-    ev.preventDefault();
-    const form = ev.target;
-    const data = new FormData();
-    const file = $("file-input").files[0];
-    const sample = $("sample-select").value;
-    if (file) data.append("file", file);
-    else if (sample) data.append("sample", sample);
-    else { $("controls-msg").textContent = "Choose a sample or upload a file first."; return; }
-
-    $("start-btn").disabled = true;
-    $("controls-msg").textContent = "Starting analysis…";
-    const resp = await api("/api/session", { method: "POST", body: data });
-    $("start-btn").disabled = false;
-
-    if (!resp.ok) {
-      const detail = (resp.body && resp.body.detail) || "backend not reachable";
-      $("controls-msg").textContent = `Could not start session: ${detail}`;
-      return;
-    }
-    clearError();
-    resetPanels();
-    $("controls-msg").textContent = `Session ${resp.body.session_id} started.`;
-    form.reset();
-    startPolling();
-  });
-}
-
-function resetPanels() {
-  state.observed = [];
-  state.stageTrail = [];
-  state.lastWindow = 0;
-  state.finished = false;
-}
-
 /* ---------- polling ---------- */
 
 function startPolling() {
@@ -147,7 +109,7 @@ function renderStatus(status) {
   if (!status) {
     pill.textContent = "no session";
     pill.className = "pill";
-    $("ns-detail").textContent = "Start an analysis to begin.";
+    $("ns-detail").textContent = "No session yet — upload a capture on the home page.";
     return;
   }
   $("ns-session").textContent = status.session_id;
@@ -338,5 +300,4 @@ function renderTraffic(summary) {
 
 /* ---------- boot ---------- */
 
-initControls();
-startPolling(); // re-attaches to an in-progress session after a page reload
+startPolling(); // attaches to the session the landing page just started
