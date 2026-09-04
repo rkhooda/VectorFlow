@@ -316,6 +316,9 @@ function fmtBytes(n) {
   return `${n} B`;
 }
 
+// a flag's score is its suspicion level, so red sits at the top of the range
+const scoreClass = (s) => (s >= 0.75 ? "score-high" : s >= 0.4 ? "score-mid" : "score-low");
+
 function renderFlagged(flows) {
   $("ff-count").textContent = flows.length;
   const body = $("ff-body");
@@ -323,18 +326,18 @@ function renderFlagged(flows) {
   body.replaceChildren(...flows.slice().reverse().map((f) => {
     const tr = document.createElement("tr");
     const cells = [
-      new Date(f.flow.start_time).toLocaleTimeString(),
-      `${f.flow.src_ip}:${f.flow.src_port}`,
-      `${f.flow.dst_ip}:${f.flow.dst_port}`,
-      f.flow.protocol,
-      String(f.flow.packet_count),
-      f.score.toFixed(2),
-      f.reason,
+      [new Date(f.flow.start_time).toLocaleTimeString(), ""],
+      [`${f.flow.src_ip}:${f.flow.src_port}`, ""],
+      [`${f.flow.dst_ip}:${f.flow.dst_port}`, ""],
+      [f.flow.protocol, "cell-proto"],
+      [String(f.flow.packet_count), ""],
+      [f.score.toFixed(2), scoreClass(f.score)],
+      [f.reason, "cell-reason"],
     ];
-    tr.replaceChildren(...cells.map((text, i) => {
+    tr.replaceChildren(...cells.map(([text, cls]) => {
       const td = document.createElement("td");
       td.textContent = text;
-      if (i === 4 || i === 5) td.className = "num";
+      if (cls) td.className = cls;
       return td;
     }));
     return tr;

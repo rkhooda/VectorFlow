@@ -119,18 +119,25 @@
 
     <div class="gap"></div>
 
-    <section id="flagged-flows" class="panel">
-      <h2>Flagged Flows <span id="ff-count" class="pill">0</span></h2>
-      <p class="muted">Suspicious flows flagged so far in the replay, newest first.</p>
-      <table>
-        <thead>
-          <tr><th>Time</th><th>Source</th><th>Destination</th><th>Proto</th>
-              <th>Packets</th><th>Score</th><th>Reason</th></tr>
-        </thead>
-        <tbody id="ff-body">
-          <tr><td colspan="7" class="muted">no flagged flows yet</td></tr>
-        </tbody>
-      </table>
+    <section id="flagged-flows" class="flows-section">
+      <div class="flows-head">
+        <div>
+          <h2 class="panel-title-lg">Flagged Flows</h2>
+          <p class="panel-sub">Suspicious flows flagged so far in the replay, newest first.</p>
+        </div>
+        <span class="flag-count"><span id="ff-count">0</span> Flags</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Time</th><th>Source</th><th>Destination</th><th>Proto</th>
+                <th>Packets</th><th>Score</th><th>Reason</th></tr>
+          </thead>
+          <tbody id="ff-body">
+            <tr><td colspan="7" class="muted">no flagged flows yet</td></tr>
+          </tbody>
+        </table>
+      </div>
     </section>
 
     <div class="gap"></div>

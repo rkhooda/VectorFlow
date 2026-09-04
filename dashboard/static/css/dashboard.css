@@ -455,8 +455,33 @@ progress::-moz-progress-bar { background: var(--accent); border-radius: 999px; }
 
 /* ---------- flagged flows table ---------- */
 
-.panel table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-.panel th {
+.flows-section {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.flows-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px;
+  border-bottom: 1px solid var(--line);
+}
+.flows-head h2 { margin: 0; }
+.flag-count {
+  flex: none;
+  padding: 2px 12px;
+  border-radius: 12px;
+  background: var(--accent-faint);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.table-wrap { overflow-x: auto; }
+.table-wrap table { width: 100%; min-width: 940px; border-collapse: collapse; }
+.table-wrap th {
   padding: 16px 24px;
   border-bottom: 1px solid var(--line);
   font-family: var(--font-mono);
@@ -468,7 +493,7 @@ progress::-moz-progress-bar { background: var(--accent); border-radius: 999px; }
   letter-spacing: 0.04em;
   white-space: nowrap;
 }
-.panel td {
+.table-wrap td {
   padding: 16px 24px;
   border-bottom: 1px solid var(--line);
   font-family: var(--font-mono);
@@ -477,7 +502,18 @@ progress::-moz-progress-bar { background: var(--accent); border-radius: 999px; }
   line-height: 20px;
   white-space: nowrap;
 }
-.panel tbody tr:last-child td { border-bottom: 0; }
+.table-wrap tbody tr:last-child td { border-bottom: 0; }
+
+.cell-proto { color: var(--accent); }
+.cell-reason {
+  min-width: 285px;
+  font-family: var(--font-sans);
+  white-space: normal;
+}
+/* higher score = more suspicious, so the warm colours sit at the top end */
+.score-low { color: var(--good); }
+.score-mid { color: var(--accent); }
+.score-high { color: var(--danger); }
 
 #ts-talkers {
   margin: 0;
