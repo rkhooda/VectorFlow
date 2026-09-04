@@ -199,18 +199,28 @@ function renderTimeline(forecast, status) {
 
   svg.innerHTML = parts.join("");
 }
+/* Progression rows: every tactic seen so far is complete except the current
+   one, which carries the backend's confidence. The contract has no per-stage
+   forecast, so no "predicted" rows are shown. */
 function renderStage(stage) {
   $("stage-name").textContent = stage.tactic_name;
   $("stage-id").textContent = `(${stage.tactic_id})`;
-  $("stage-confidence").textContent = `${(stage.confidence * 100).toFixed(0)}%`;
 
   const trail = state.stageTrail;
   if (trail[trail.length - 1] !== stage.tactic_name) trail.push(stage.tactic_name);
-  const ol = $("stage-trail");
-  ol.replaceChildren(...trail.map((name, i) => {
+  $("stage-trail").replaceChildren(...trail.map((name, i) => {
+    const active = i === trail.length - 1;
     const li = document.createElement("li");
-    li.textContent = name;
-    if (i === trail.length - 1) li.className = "current";
+    li.className = `stage-row ${active ? "active" : "done"}`;
+    const label = document.createElement("span");
+    label.className = "stage-label";
+    label.textContent = name;
+    const status = document.createElement("span");
+    status.className = "stage-status";
+    status.textContent = active
+      ? `${(stage.confidence * 100).toFixed(0)}% active`
+      : "100% completed";
+    li.append(label, status);
     return li;
   }));
 }

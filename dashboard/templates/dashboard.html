@@ -84,19 +84,18 @@
 
     <div class="split split-risk">
       <div class="risk-col">
-        <section id="attack-risk" class="panel">
+        <section id="attack-risk" class="panel panel-inset">
           <h2>Attack risk</h2>
           <div id="risk-value">—</div>
-          <p><span id="risk-severity" class="pill">no data</span></p>
-          <p class="muted">Probability of network infiltration at the current replay position
+          <p class="risk-tag"><span id="risk-severity" class="pill">no data</span></p>
+          <p class="panel-sub">Probability of network infiltration at the current replay position
             (<span id="risk-model">—</span>).</p>
         </section>
 
-        <section id="attack-stage" class="panel">
-          <h2>Attack stage (MITRE ATT&amp;CK)</h2>
-          <p><strong id="stage-name">—</strong> <span id="stage-id" class="muted"></span></p>
-          <p class="muted">Confidence: <span id="stage-confidence">—</span></p>
-          <ol id="stage-trail"><li class="muted">no stages yet</li></ol>
+        <section id="attack-stage" class="panel panel-inset">
+          <h2 class="panel-sub">Current Stage</h2>
+          <p class="stage-current"><span id="stage-name">—</span><span id="stage-id"></span></p>
+          <ol id="stage-trail" class="stage-list"><li class="muted">no stages yet</li></ol>
         </section>
       </div>
 
