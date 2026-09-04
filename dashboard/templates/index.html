@@ -6,6 +6,27 @@
 {% endblock %}
 
 {% block body %}
+{# Decorative only: the Figma backdrop is laid out against a fixed 1470px
+   design frame, centred and clipped to the viewport. #}
+<div class="backdrop" aria-hidden="true">
+  <div class="backdrop-inner">
+    <div class="grid-frame">
+      <span class="grid-label grid-label-tl">[ 200 OK ]</span>
+      <span class="grid-label grid-label-bl">[ HTTP ]</span>
+      <span class="grid-label grid-label-tr">[ SCAN ]</span>
+      <span class="grid-label grid-label-br">[ TCP ]</span>
+    </div>
+    <div class="grid-tail grid-tail-l"></div>
+    <div class="grid-tail grid-tail-r"></div>
+    <img class="grid-marker grid-marker-l" src="{{ url_for('static', filename='img/marker.svg') }}" alt="" width="47" height="47">
+    <img class="grid-marker grid-marker-r" src="{{ url_for('static', filename='img/marker.svg') }}" alt="" width="47" height="47">
+    <div class="decor-dots">
+      <img src="{{ url_for('static', filename='img/ascii-small.png') }}" alt="">
+    </div>
+    <img class="decor-flow" src="{{ url_for('static', filename='img/ascii-main.png') }}" alt="">
+  </div>
+</div>
+
 <nav class="nav">
   <a class="nav-brand" href="{{ url_for('index') }}">
     <img class="nav-logo" src="{{ url_for('static', filename='img/logo.png') }}" alt="" width="39" height="40">
