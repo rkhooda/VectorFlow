@@ -158,10 +158,30 @@ body { background: var(--surface); }
   line-height: 24px;
 }
 
-.subhead {
-  margin: 20px 0 8px;
+.panel-head { display: flex; align-items: center; gap: 16px; }
+.panel-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+.panel-icon img { width: 20px; height: 20px; }
+
+/* body copy lines up under the panel title, past the 28px icon + 16px gap */
+.indent { padding-left: 44px; }
+
+.panel-sub {
+  margin: 0;
   font-size: 13px;
-  font-weight: 400;
+  line-height: 21.13px;
+  color: var(--muted);
+}
+
+.panel-note {
+  margin: 12px 0 0;
+  font-size: 12px;
+  font-weight: 500;
   line-height: 20px;
   color: var(--muted);
 }
@@ -171,6 +191,33 @@ body { background: var(--surface); }
   line-height: 20px;
   color: var(--muted);
 }
+
+/* ---------- disclosure rows ---------- */
+
+.disclosure { margin-top: 20px; }
+.disclosure summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 20px;
+  cursor: pointer;
+  list-style: none;
+}
+.disclosure summary::-webkit-details-marker { display: none; }
+.disclosure-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 7.2px;
+  background: var(--sunken);
+}
+.disclosure-icon img { width: 14px; height: 14px; }
+.disclosure[open] .disclosure-icon { background: var(--accent-soft); }
+.disclosure > :not(summary) { margin-top: 16px; }
 
 /* ---------- tags / pills ---------- */
 
@@ -211,9 +258,28 @@ progress::-moz-progress-bar { background: var(--accent); border-radius: 999px; }
 
 /* ---------- key/value list ---------- */
 
-.kv { display: grid; grid-template-columns: max-content 1fr; gap: 8px 18px; margin: 16px 0 0; }
-.kv dt { font-family: var(--font-mono); font-size: 13px; line-height: 20px; }
-.kv dd { margin: 0; font-family: var(--font-mono); font-size: 13px; line-height: 20px; }
+.kv { display: flex; flex-direction: column; gap: 12px; margin: 24px 0 0; }
+.kv-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.kv dt {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+}
+.kv dd { margin: 0; min-width: 0; }
+.kv-file {
+  display: inline-block;
+  max-width: 100%;
+  padding: 1.25px 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 16px;
+  color: #000;
+  text-decoration: underline;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /* ---------- metric grid ---------- */
 

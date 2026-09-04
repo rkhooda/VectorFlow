@@ -40,29 +40,43 @@
 
     <div class="split">
       <section id="traffic-summary" class="panel panel-tinted">
-        <h2>Traffic summary</h2>
+        <div class="panel-head">
+          <span class="panel-icon"><img src="{{ url_for('static', filename='img/icon-traffic.png') }}" alt="" width="20" height="20"></span>
+          <h2>Traffic summary</h2>
+        </div>
+        <p class="panel-sub indent">Current session, file, and replay status.</p>
         <div class="metrics">
           <div class="metric"><span class="metric-label">Windows seen</span><span class="metric-value" id="ts-windows">—</span></div>
           <div class="metric"><span class="metric-label">Flows</span><span class="metric-value" id="ts-flows">—</span></div>
           <div class="metric"><span class="metric-label">Packets</span><span class="metric-value" id="ts-packets">—</span></div>
           <div class="metric"><span class="metric-label">Bytes</span><span class="metric-value" id="ts-bytes">—</span></div>
         </div>
-        <h3 class="subhead">Protocol breakdown</h3>
-        <div id="ts-protocols"></div>
-        <h3 class="subhead">Top talkers (by bytes sent)</h3>
-        <ol id="ts-talkers"><li class="muted">no data yet</li></ol>
+        <details class="disclosure">
+          <summary>Protocol breakdown<span class="disclosure-icon"><img src="{{ url_for('static', filename='img/icon-eye-off.svg') }}" alt="" width="14" height="14"></span></summary>
+          <div id="ts-protocols"></div>
+        </details>
+        <details class="disclosure">
+          <summary>Top talkers<span class="disclosure-icon"><img src="{{ url_for('static', filename='img/icon-eye-off.svg') }}" alt="" width="14" height="14"></span></summary>
+          <ol id="ts-talkers"><li class="muted">no data yet</li></ol>
+        </details>
       </section>
 
       <section id="network-status" class="panel">
-        <h2>Network status</h2>
-        <dl class="kv">
-          <dt>Session</dt><dd id="ns-session">—</dd>
-          <dt>Input file</dt><dd id="ns-input">—</dd>
-          <dt>State</dt><dd><span id="ns-state" class="pill">no session</span></dd>
-          <dt>Replay window</dt><dd id="ns-window">—</dd>
-        </dl>
-        <progress id="ns-progress" max="1" value="0"></progress>
-        <p class="muted" id="ns-detail"></p>
+        <div class="panel-head">
+          <span class="panel-icon"><img src="{{ url_for('static', filename='img/icon-network.png') }}" alt="" width="20" height="20"></span>
+          <h2>Network status</h2>
+        </div>
+        <p class="panel-sub indent">Current traffic volume, protocols, and top network hosts.</p>
+        <div class="indent">
+          <dl class="kv">
+            <div class="kv-row"><dt>Session</dt><dd><span class="pill" id="ns-session">—</span></dd></div>
+            <div class="kv-row"><dt>Input file</dt><dd><span class="kv-file" id="ns-input">—</span></dd></div>
+            <div class="kv-row"><dt>State</dt><dd><span id="ns-state" class="pill">no session</span></dd></div>
+            <div class="kv-row"><dt>Replay window</dt><dd><span class="pill" id="ns-window">—</span></dd></div>
+          </dl>
+          <progress id="ns-progress" max="1" value="0"></progress>
+          <p class="panel-note" id="ns-detail"></p>
+        </div>
       </section>
     </div>
 
