@@ -74,6 +74,189 @@ body {
   outline-offset: 2px;
 }
 
+/* ---------- hero ---------- */
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 128px 16px 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+.badge > span:first-child {
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 20px;
+}
+.badge-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin: 1px;
+  border-radius: 999px;
+  background: var(--ink);
+}
+.badge-dot img { width: 10px; height: 8px; }
+
+.hero-title {
+  margin: 0;
+  font-size: 60px;
+  font-weight: 500;
+  line-height: 64px;
+  letter-spacing: -0.3px;
+  text-align: center;
+  text-wrap: balance;
+}
+.hero-title em { color: var(--accent); font-style: normal; }
+
+.hero-sub {
+  max-width: 504px;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  text-align: center;
+}
+
+/* ---------- upload card ---------- */
+
+.upload-card {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  width: 552px;
+  max-width: 100%;
+  margin-top: 20px; /* 36px design gap, less the .hero 16px row gap */
+  padding: 24px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow:
+    0 0 44px 0 rgba(0, 0, 0, 0.02),
+    0 88px 56px -20px rgba(0, 0, 0, 0.03),
+    0 56px 56px -20px rgba(0, 0, 0, 0.02),
+    0 32px 32px -20px rgba(0, 0, 0, 0.03),
+    0 16px 24px -12px rgba(0, 0, 0, 0.03),
+    0 0 0 1px rgba(0, 0, 0, 0.05),
+    0 0 0 10px var(--page);
+}
+
+.upload-fields {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.upload-label {
+  font-size: 15px;
+  font-weight: 400;
+  color: rgba(38, 38, 38, 0.48);
+}
+
+.tablist {
+  display: flex;
+  align-items: center;
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 2px;
+  border-radius: 10px;
+  background: var(--sunken);
+  box-shadow:
+    inset 0 6px 12px 0 rgba(0, 0, 0, 0.02),
+    inset 0 0.75px 0.75px 0 rgba(0, 0, 0, 0.02),
+    inset 0 0.25px 0.25px 0 rgba(0, 0, 0, 0.04);
+}
+
+.tab {
+  padding: 7px 13px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.tab-active {
+  border-color: var(--line);
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.05));
+}
+
+/* The design shows a single "No file choosen" slot; it doubles as the sample
+   picker, so it is a bare <select> stripped of its native chrome. */
+.tab-muted {
+  min-width: 0;
+  overflow: hidden;
+  appearance: none;
+  background: none;
+  color: rgba(38, 38, 38, 0.56);
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+#file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+#file-input:focus-visible + .tab-active {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.upload-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  padding: 10px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  cursor: pointer;
+  transition: background-color 150ms ease-out;
+}
+.upload-submit:hover { background: #e64500; }
+.upload-submit:disabled { opacity: 0.6; cursor: default; }
+.upload-submit img { width: 20px; height: 20px; }
+
+.upload-msg {
+  min-height: 20px;
+  margin: 22px 0 0;
+  font-size: 13px;
+  color: rgba(38, 38, 38, 0.56);
+  text-align: center;
+}
+
 @media (max-width: 720px) {
   .nav { padding-top: 32px; }
+  .hero { padding-top: 64px; }
+  .hero-title { font-size: 38px; line-height: 42px; }
+  .upload-card { flex-direction: column; align-items: stretch; }
+  .upload-submit { justify-content: center; }
 }
