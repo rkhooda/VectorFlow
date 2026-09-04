@@ -2,89 +2,124 @@
 {% block title %}VectorFlow — Attack Forecasting{% endblock %}
 
 {% block head %}
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 {% endblock %}
 
 {% block body %}
-<header>
-  <h1><a href="{{ url_for('index') }}">VectorFlow</a> — AI-based Network Attack Forecasting</h1>
-  <span id="backend-health" class="status-badge {{ 'ok' if backend.status == 'ok' else 'bad' }}">
-    backend: {{ backend.status }}{% if backend.version %} v{{ backend.version }}{% endif %}
-  </span>
-</header>
-<div id="error-banner" hidden></div>
-<main>
+<aside class="rail">
+  <a class="rail-logo" href="{{ url_for('index') }}" aria-label="VectorFlow home">
+    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="" width="39" height="40">
+  </a>
+  <span class="rail-avatar" aria-hidden="true">A</span>
+</aside>
 
-<section id="network-status" class="card">
-  <h2>Network status</h2>
-  <dl class="kv">
-    <dt>Session</dt><dd id="ns-session">—</dd>
-    <dt>Input file</dt><dd id="ns-input">—</dd>
-    <dt>State</dt><dd><span id="ns-state" class="pill">no session</span></dd>
-    <dt>Replay window</dt><dd id="ns-window">—</dd>
-  </dl>
-  <progress id="ns-progress" max="1" value="0"></progress>
-  <p id="ns-detail" class="muted"></p>
-</section>
+<div class="shell">
+  <header class="topbar">
+    <a class="chip" href="{{ url_for('index') }}">
+      <span class="chip-badge">V</span>VectorFlow
+    </a>
+    <div class="topbar-actions">
+      <span id="backend-health" class="chip chip-status {{ 'ok' if backend.status == 'ok' else 'bad' }}">
+        backend: {{ backend.status }}{% if backend.version %} v{{ backend.version }}{% endif %}
+      </span>
+      <a class="chip chip-primary" href="{{ url_for('index') }}">
+        <img src="{{ url_for('static', filename='img/icon-upload.svg') }}" alt="" width="16" height="16">
+        Upload Sample
+      </a>
+    </div>
+  </header>
 
-<section id="attack-risk" class="card">
-  <h2>Attack risk</h2>
-  <div id="risk-value">—</div>
-  <p><span id="risk-severity" class="pill">no data</span></p>
-  <p class="muted">Probability of network infiltration at the current replay position
-    (<span id="risk-model">—</span>).</p>
-</section>
+  <div id="error-banner" hidden></div>
 
-<section id="forecast-timeline" class="card wide">
-  <h2>Live forecast timeline</h2>
-  <svg id="timeline-svg" viewBox="0 0 720 200" preserveAspectRatio="none" role="img"
-       aria-label="Attack probability over the replay timeline"></svg>
-  <p class="muted">Solid line: observed windows so far. Dashed line: forecast horizon
-    from the current position. Hover a point for its value.</p>
-</section>
+  <main class="frame">
+    <div class="band">
+      <h1>Observe network activity</h1>
+      <p>Monitor the current network status and traffic activity.</p>
+    </div>
 
-<section id="attack-stage" class="card">
-  <h2>Attack stage (MITRE ATT&amp;CK)</h2>
-  <p><strong id="stage-name">—</strong> <span id="stage-id" class="muted"></span></p>
-  <p class="muted">Confidence: <span id="stage-confidence">—</span></p>
-  <h3 class="subhead">Progression this session</h3>
-  <ol id="stage-trail"><li class="muted">no stages yet</li></ol>
-</section>
+    <div class="split">
+      <section id="traffic-summary" class="panel panel-tinted">
+        <h2>Traffic summary</h2>
+        <div class="metrics">
+          <div class="metric"><span class="metric-label">Windows seen</span><span class="metric-value" id="ts-windows">—</span></div>
+          <div class="metric"><span class="metric-label">Flows</span><span class="metric-value" id="ts-flows">—</span></div>
+          <div class="metric"><span class="metric-label">Packets</span><span class="metric-value" id="ts-packets">—</span></div>
+          <div class="metric"><span class="metric-label">Bytes</span><span class="metric-value" id="ts-bytes">—</span></div>
+        </div>
+        <h3 class="subhead">Protocol breakdown</h3>
+        <div id="ts-protocols"></div>
+        <h3 class="subhead">Top talkers (by bytes sent)</h3>
+        <ol id="ts-talkers"><li class="muted">no data yet</li></ol>
+      </section>
 
-<section id="explanations" class="card">
-  <h2>Why this prediction?</h2>
-  <p id="expl-summary" class="muted">No prediction yet.</p>
-  <div id="expl-features"></div>
-</section>
+      <section id="network-status" class="panel">
+        <h2>Network status</h2>
+        <dl class="kv">
+          <dt>Session</dt><dd id="ns-session">—</dd>
+          <dt>Input file</dt><dd id="ns-input">—</dd>
+          <dt>State</dt><dd><span id="ns-state" class="pill">no session</span></dd>
+          <dt>Replay window</dt><dd id="ns-window">—</dd>
+        </dl>
+        <progress id="ns-progress" max="1" value="0"></progress>
+        <p class="muted" id="ns-detail"></p>
+      </section>
+    </div>
 
-<section id="traffic-summary" class="card">
-  <h2>Traffic summary</h2>
-  <div class="metrics">
-    <div class="metric"><span class="metric-label">Windows seen</span><span class="metric-value" id="ts-windows">—</span></div>
-    <div class="metric"><span class="metric-label">Flows</span><span class="metric-value" id="ts-flows">—</span></div>
-    <div class="metric"><span class="metric-label">Packets</span><span class="metric-value" id="ts-packets">—</span></div>
-    <div class="metric"><span class="metric-label">Bytes</span><span class="metric-value" id="ts-bytes">—</span></div>
-  </div>
-  <h3 class="subhead">Protocol breakdown</h3>
-  <div id="ts-protocols"></div>
-  <h3 class="subhead">Top talkers (by bytes sent)</h3>
-  <ol id="ts-talkers"><li class="muted">no data yet</li></ol>
-</section>
+    <div class="gap"></div>
 
-<section id="flagged-flows" class="card wide">
-  <h2>Flagged flows <span id="ff-count" class="pill">0</span></h2>
-  <p class="muted">Suspicious flows flagged so far in the replay, newest first.</p>
-  <table>
-    <thead>
-      <tr><th>Time</th><th>Source</th><th>Destination</th><th>Proto</th>
-          <th>Packets</th><th>Score</th><th>Reason</th></tr>
-    </thead>
-    <tbody id="ff-body">
-      <tr><td colspan="7" class="muted">no flagged flows yet</td></tr>
-    </tbody>
-  </table>
-</section>
+    <div class="split split-risk">
+      <div class="risk-col">
+        <section id="attack-risk" class="panel">
+          <h2>Attack risk</h2>
+          <div id="risk-value">—</div>
+          <p><span id="risk-severity" class="pill">no data</span></p>
+          <p class="muted">Probability of network infiltration at the current replay position
+            (<span id="risk-model">—</span>).</p>
+        </section>
 
-</main>
+        <section id="attack-stage" class="panel">
+          <h2>Attack stage (MITRE ATT&amp;CK)</h2>
+          <p><strong id="stage-name">—</strong> <span id="stage-id" class="muted"></span></p>
+          <p class="muted">Confidence: <span id="stage-confidence">—</span></p>
+          <ol id="stage-trail"><li class="muted">no stages yet</li></ol>
+        </section>
+      </div>
+
+      <section id="forecast-timeline" class="panel">
+        <h2>Live forecast timeline</h2>
+        <svg id="timeline-svg" viewBox="0 0 720 200" preserveAspectRatio="none" role="img"
+             aria-label="Attack probability over the replay timeline"></svg>
+      </section>
+    </div>
+
+    <div class="gap"></div>
+
+    <section id="explanations" class="panel">
+      <h2>Why this prediction</h2>
+      <p class="muted" id="expl-summary">No prediction yet.</p>
+      <div id="expl-features"></div>
+    </section>
+
+    <div class="gap"></div>
+
+    <section id="flagged-flows" class="panel">
+      <h2>Flagged Flows <span id="ff-count" class="pill">0</span></h2>
+      <p class="muted">Suspicious flows flagged so far in the replay, newest first.</p>
+      <table>
+        <thead>
+          <tr><th>Time</th><th>Source</th><th>Destination</th><th>Proto</th>
+              <th>Packets</th><th>Score</th><th>Reason</th></tr>
+        </thead>
+        <tbody id="ff-body">
+          <tr><td colspan="7" class="muted">no flagged flows yet</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="gap"></div>
+  </main>
+</div>
+
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}

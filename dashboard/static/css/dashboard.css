@@ -1,0 +1,345 @@
+/* VectorFlow dashboard — Figma "Main Dashboard" (node 64:18250).
+   Tokens, reset and the chip/button shape come from base.css. */
+
+body { background: var(--surface); }
+
+/* ---------- left rail ---------- */
+
+.rail {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 64px;
+  border-right: 1px solid var(--line);
+  background: var(--page);
+}
+
+.rail-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 64px;
+  border-bottom: 1px solid var(--line);
+}
+.rail-logo img { width: 39px; height: 40px; }
+
+.rail-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-bottom: 15px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--accent-faint);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ---------- top bar ---------- */
+
+.shell { margin-left: 64px; }
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 64px;
+  padding: 0 16px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--page);
+}
+
+.topbar-actions { display: flex; align-items: center; gap: 12px; }
+
+.chip-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.chip-status {
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  cursor: default;
+}
+.chip-status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--grey-light);
+}
+.chip-status.ok::before { background: var(--good); }
+.chip-status.bad::before { background: var(--danger); }
+.chip-status:hover { background: var(--sunken); }
+
+#error-banner {
+  margin: 12px 24px 0;
+  padding: 9px 16px;
+  border-radius: 8px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 13px;
+}
+
+/* ---------- section frame ---------- */
+
+.frame {
+  max-width: 1310px;
+  margin: 0 auto;
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+}
+
+.band {
+  padding: 24px;
+  border-bottom: 1px solid var(--line);
+}
+.band h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 28px;
+  letter-spacing: -0.1px;
+}
+.band p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--muted);
+}
+
+.gap { height: 64px; }
+
+.split {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--line);
+}
+.split > .panel:first-child { border-right: 1px solid var(--line); }
+
+.panel { flex: 1; min-width: 0; padding: 24px; }
+.panel-tinted { background: var(--page); }
+
+/* the risk column stacks two panels beside the full-height chart */
+.risk-col {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  width: 431px;
+  border-right: 1px solid var(--line);
+}
+.risk-col .panel + .panel { border-top: 1px solid var(--line); }
+.split-risk > .risk-col + .panel { border-right: 0; }
+
+.panel h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.subhead {
+  margin: 20px 0 8px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--muted);
+}
+
+.muted {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--muted);
+}
+
+/* ---------- tags / pills ---------- */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 1.25px 8px;
+  border-radius: 6px;
+  background: var(--sunken);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 16px;
+}
+.pill.active   { background: var(--accent-soft); color: var(--accent); }
+.pill.done,
+.pill.low      { background: var(--good-soft); color: var(--good); }
+.pill.moderate,
+.pill.high     { background: var(--accent-soft); color: var(--accent); }
+.pill.bad,
+.pill.critical { background: var(--danger-soft); color: var(--danger); }
+
+/* ---------- progress ---------- */
+
+progress {
+  display: block;
+  width: 100%;
+  height: 6px;
+  margin: 12px 0 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--track);
+  accent-color: var(--accent);
+}
+progress::-webkit-progress-bar { background: var(--track); border-radius: 999px; }
+progress::-webkit-progress-value { background: var(--accent); border-radius: 999px; }
+progress::-moz-progress-bar { background: var(--accent); border-radius: 999px; }
+
+/* ---------- key/value list ---------- */
+
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 8px 18px; margin: 16px 0 0; }
+.kv dt { font-family: var(--font-mono); font-size: 13px; line-height: 20px; }
+.kv dd { margin: 0; font-family: var(--font-mono); font-size: 13px; line-height: 20px; }
+
+/* ---------- metric grid ---------- */
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 24px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 20px 24px;
+  min-width: 0;
+}
+.metric + .metric { border-left: 1px solid var(--line); }
+.metric-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 20px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.metric-value {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+/* ---------- bar rows (protocols, features) ---------- */
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  margin: 0 0 16px;
+}
+.bar-row .name {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bar-row .val {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--accent);
+  text-align: right;
+}
+.bar-track {
+  grid-column: 1 / -1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--track);
+  overflow: hidden;
+}
+.bar-fill { height: 6px; border-radius: 999px; background: var(--accent); }
+
+/* ---------- attack risk ---------- */
+
+#risk-value {
+  margin: 4px 0 12px;
+  font-size: 44px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+#attack-risk p { margin: 0 0 12px; }
+#attack-risk p:last-child { margin-bottom: 0; }
+
+/* ---------- forecast timeline ---------- */
+
+#timeline-svg { display: block; width: 100%; height: 372px; margin-top: 20px; }
+
+/* ---------- flagged flows table ---------- */
+
+.panel table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+.panel th {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.panel td {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  white-space: nowrap;
+}
+.panel tbody tr:last-child td { border-bottom: 0; }
+
+#ts-talkers {
+  margin: 0;
+  padding-left: 22px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 22px;
+}
+
+/* ---------- narrow screens ---------- */
+
+@media (max-width: 1000px) {
+  .split { display: block; }
+  .split > .panel:first-child { border-right: 0; border-bottom: 1px solid var(--line); }
+  .gap { height: 32px; }
+}
+
+@media (max-width: 640px) {
+  .rail { display: none; }
+  .shell { margin-left: 0; }
+  .topbar { padding: 0 12px; }
+  .panel { padding: 16px; }
+}

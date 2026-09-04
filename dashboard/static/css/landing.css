@@ -1,31 +1,7 @@
 /* VectorFlow landing page — Figma "Main screen" (node 64:18767).
-   Suisse Intl Trial is licensed; Inter is the substitute metric-wise closest
-   to it, so the type stack names both and falls back on system sans. */
+   Tokens, reset and the shared chip/button shape live in base.css. */
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Geist+Mono:wght@400&display=swap");
-
-:root {
-  --page: #f9f9f9;
-  --ink: #262626;
-  --accent: #ff4d00;
-  --line: #ededed;
-  --sunken: rgba(0, 0, 0, 0.04);
-  --font-sans: "Suisse Intl Trial", "Suisse Intl", Inter, -apple-system,
-    "Segoe UI", sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
-  --frame: 986px; /* nav / content measure from the design */
-}
-
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: var(--font-sans);
-  color: var(--ink);
-  background: var(--page);
-  -webkit-font-smoothing: antialiased;
-}
+:root { --frame: 986px; } /* nav / content measure from the design */
 
 /* ---------- backdrop ----------
    Every offset below is measured off the 1470x840 Figma frame, which
@@ -197,11 +173,6 @@ body {
 }
 
 .nav-link:hover { background: rgba(0, 0, 0, 0.07); }
-
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
 
 /* ---------- hero ---------- */
 
