@@ -157,6 +157,11 @@ body { background: var(--surface); }
   font-weight: 500;
   line-height: 24px;
 }
+.panel-title-lg {
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: -0.1px;
+}
 
 .panel-head { display: flex; align-items: center; gap: 16px; }
 .panel-icon {
@@ -423,7 +428,13 @@ progress::-moz-progress-bar { background: var(--accent); border-radius: 999px; }
 
 /* ---------- forecast timeline ---------- */
 
-#timeline-svg { display: block; width: 100%; height: 372px; margin-top: 20px; }
+#timeline-svg { display: block; width: 100%; height: auto; margin-top: 20px; }
+.c-axis { font-family: var(--font-mono); font-size: 12px; fill: var(--muted); }
+.c-axis-line { stroke: var(--line); }
+.c-line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; }
+.c-line-forecast { stroke-dasharray: 2 5; }
+.c-crosshair { stroke: var(--faint); stroke-dasharray: 2 4; }
+.c-dot { fill: var(--accent); }
 
 /* ---------- flagged flows table ---------- */
 

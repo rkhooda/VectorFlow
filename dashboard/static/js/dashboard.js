@@ -153,51 +153,80 @@ function renderRisk(forecast) {
   $("risk-model").textContent = forecast.model_name;
 }
 
-/* Single-hue line chart: observed windows (solid) + forecast horizon (dashed).
-   Native <title> tooltips on the points; recessive gridlines. */
+/* Risk-over-time chart. The x axis is seconds relative to the current replay
+   position: observed windows run negative, the forecast horizon positive. */
+
+const SEC_PER_WINDOW = POLL_MS / 1000; // mirrors replay.seconds_per_window
+const PLOT = { l: 45, r: 766, t: 32, b: 324 }; // inside the 794x372 viewBox
+
+// smallest step that keeps the axis under ~7 labels
+const niceStep = (span) =>
+  [5, 10, 20, 30, 60, 120, 300].find((s) => span / s <= 7) || 600;
+
+// quadratic segments through the midpoints — a smooth curve without a library
+function smoothPath(pts) {
+  if (pts.length < 3) return `M${pts.join("L")}`;
+  let d = `M${pts[0]}`;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const [x, y] = pts[i];
+    const [nx, ny] = pts[i + 1];
+    d += ` Q${x},${y} ${(x + nx) / 2},${(y + ny) / 2}`;
+  }
+  return `${d} L${pts[pts.length - 1]}`;
+}
+
 function renderTimeline(forecast, status) {
-  const svg = $("timeline-svg");
   const observed = state.observed;
   if (!observed.length) return;
 
   const horizon = forecast.horizon || [];
-  const lastX = status.total_windows + horizon.length;
-  const W = 720, H = 200, PAD_L = 34, PAD_R = 8, PAD_T = 10, PAD_B = 22;
-  const x = (w) => PAD_L + ((w - 1) / Math.max(lastX - 1, 1)) * (W - PAD_L - PAD_R);
-  const y = (p) => PAD_T + (1 - p) * (H - PAD_T - PAD_B);
+  const now = status.current_window;
+  const { l, r, t, b } = PLOT;
+  const xMin = (observed[0].window - now) * SEC_PER_WINDOW;
+  const xMax = horizon.length * SEC_PER_WINDOW;
+  const X = (s) => l + ((s - xMin) / Math.max(xMax - xMin, 1)) * (r - l);
+  const Y = (p) => b - p * (b - t);
 
-  const parts = [];
-  // gridlines + y labels at 0 / 0.5 / 1
-  for (const g of [0, 0.5, 1]) {
-    parts.push(`<line x1="${PAD_L}" y1="${y(g)}" x2="${W - PAD_R}" y2="${y(g)}" stroke="#e5e7eb"/>`);
-    parts.push(`<text x="${PAD_L - 6}" y="${y(g) + 4}" text-anchor="end" font-size="10" fill="#888">${g * 100}%</text>`);
+  const parts = [
+    '<defs><linearGradient id="risk-fill" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0" stop-color="#ff4d00" stop-opacity="0.18"/>' +
+      '<stop offset="1" stop-color="#ff4d00" stop-opacity="0"/></linearGradient></defs>',
+    '<text x="14" y="16" class="c-axis">Risk(%)</text>',
+    `<text x="${(l + r) / 2}" y="366" class="c-axis" text-anchor="middle">Time(s)</text>`,
+    `<line x1="${l}" y1="${t - 5}" x2="${l}" y2="${b}" class="c-axis-line"/>`,
+    `<line x1="${l}" y1="${b}" x2="${r}" y2="${b}" class="c-axis-line"/>`,
+  ];
+
+  for (let i = 0; i <= 4; i++) {
+    const y = t + (i * (b - t)) / 4;
+    parts.push(`<text x="36" y="${y + 4}" class="c-axis" text-anchor="end">${100 - i * 25}</text>`);
   }
-  // "now" marker at the current window
-  const nowX = x(status.current_window);
-  parts.push(`<line x1="${nowX}" y1="${PAD_T}" x2="${nowX}" y2="${H - PAD_B}" stroke="#bbb" stroke-dasharray="2 3"/>`);
-  parts.push(`<text x="${nowX + 4}" y="${PAD_T + 10}" font-size="10" fill="#888">now</text>`);
-  parts.push(`<text x="${PAD_L}" y="${H - 6}" font-size="10" fill="#888">window 1</text>`);
-  parts.push(`<text x="${W - PAD_R}" y="${H - 6}" text-anchor="end" font-size="10" fill="#888">+${horizon.length} forecast</text>`);
 
-  const pts = observed.map((o) => `${x(o.window)},${y(o.probability)}`);
-  parts.push(`<polyline points="${pts.join(" ")}" fill="none" stroke="#3b6ff0" stroke-width="2"/>`);
+  const step = niceStep(xMax - xMin);
+  for (let s = Math.ceil(xMin / step) * step; s <= xMax; s += step) {
+    parts.push(`<text x="${X(s)}" y="344" class="c-axis" text-anchor="middle">` +
+      `${s > 0 ? "+" : ""}${s}</text>`);
+  }
 
   const last = observed[observed.length - 1];
-  const fpts = [`${x(last.window)},${y(last.probability)}`].concat(
-    horizon.map((h, i) => `${x(last.window + i + 1)},${y(h.probability)}`)
+  const seen = observed.map((o) => [X((o.window - now) * SEC_PER_WINDOW), Y(o.probability)]);
+  const ahead = [[X(0), Y(last.probability)]].concat(
+    horizon.map((h, i) => [X((i + 1) * SEC_PER_WINDOW), Y(h.probability)])
   );
-  parts.push(`<polyline points="${fpts.join(" ")}" fill="none" stroke="#3b6ff0" stroke-width="2" stroke-dasharray="5 4" opacity="0.7"/>`);
 
-  for (const o of observed) {
-    parts.push(`<circle cx="${x(o.window)}" cy="${y(o.probability)}" r="3" fill="#3b6ff0">` +
-      `<title>window ${o.window}: ${(o.probability * 100).toFixed(1)}%</title></circle>`);
-  }
-  horizon.forEach((h, i) => {
-    parts.push(`<circle cx="${x(last.window + i + 1)}" cy="${y(h.probability)}" r="3" fill="#fff" stroke="#3b6ff0" stroke-width="1.5">` +
-      `<title>forecast +${h.step}: ${(h.probability * 100).toFixed(1)}%</title></circle>`);
-  });
+  const curve = smoothPath(seen);
+  parts.push(`<path d="${curve} L${seen[seen.length - 1][0]},${b} L${seen[0][0]},${b} Z" fill="url(#risk-fill)"/>`);
+  parts.push(`<path d="${curve}" class="c-line"/>`);
+  parts.push(`<path d="${smoothPath(ahead)}" class="c-line c-line-forecast"/>`);
 
-  svg.innerHTML = parts.join("");
+  const cx = X(0);
+  const cy = Y(last.probability);
+  parts.push(`<line x1="${cx}" y1="${t - 5}" x2="${cx}" y2="${b}" class="c-crosshair"/>`);
+  parts.push(`<line x1="${l}" y1="${cy}" x2="${r}" y2="${cy}" class="c-crosshair"/>`);
+  parts.push(`<circle cx="${cx}" cy="${cy}" r="4.5" class="c-dot">` +
+    `<title>now: ${(last.probability * 100).toFixed(1)}%</title></circle>`);
+
+  $("timeline-svg").innerHTML = parts.join("");
 }
 /* Progression rows: every tactic seen so far is complete except the current
    one, which carries the backend's confidence. The contract has no per-stage
