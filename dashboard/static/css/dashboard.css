@@ -320,10 +320,27 @@ progress::-moz-progress-bar { background: var(--accent); border-radius: 999px; }
 
 /* ---------- bar rows (protocols, features) ---------- */
 
+.panel-boxed { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.panel-head-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+  margin-top: 24px;
+}
+.feature-grid .bar-row { margin: 0; }
+
 .bar-row {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 4px 12px;
+  gap: 8px 12px;
   margin: 0 0 16px;
 }
 .bar-row .name {

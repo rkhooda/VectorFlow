@@ -108,10 +108,13 @@
 
     <div class="gap"></div>
 
-    <section id="explanations" class="panel">
-      <h2>Why this prediction</h2>
-      <p class="muted" id="expl-summary">No prediction yet.</p>
-      <div id="expl-features"></div>
+    <section id="explanations" class="panel panel-boxed">
+      <div class="panel-head-row">
+        <h2 class="panel-title-lg">Why this prediction</h2>
+        <button class="chip chip-primary" id="expl-toggle" type="button">View All factors</button>
+      </div>
+      <p class="panel-sub" id="expl-summary">No prediction yet.</p>
+      <div id="expl-features" class="feature-grid"></div>
     </section>
 
     <div class="gap"></div>

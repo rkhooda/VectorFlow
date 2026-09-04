@@ -11,6 +11,8 @@ const state = {
   timer: null,
   observed: [],   // [{window, probability}] accumulated client-side during replay
   stageTrail: [], // tactic names in the order they appeared
+  features: [],   // last explanation's contributions, most important first
+  allFeatures: false, // "View All factors" toggle
   lastWindow: 0,
   finished: false,
 };
@@ -273,19 +275,40 @@ function barRows(container, rows) {
     const val = document.createElement("span");
     val.className = "val";
     val.textContent = r.display;
-    row.append(name, track, val);
+    if (r.title) row.title = r.title;
+    row.append(name, val, track); // label and value share the top row, bar below
     return row;
   }));
 }
 
+/* The bar and its label both show the feature's share of the strongest
+   contribution; the signed value stays on the row's tooltip. */
+const TOP_FEATURES = 4; // the 2x2 grid in the design
+
 function renderExplanations(expl) {
   $("expl-summary").textContent = expl.summary;
-  barRows($("expl-features"), expl.top_features.map((f) => ({
+  state.features = expl.top_features;
+  drawFeatures();
+}
+
+function drawFeatures() {
+  const all = state.features;
+  if (!all.length) return;
+  const max = Math.max(...all.map((f) => Math.abs(f.contribution)), 1e-9);
+  const shown = state.allFeatures ? all : all.slice(0, TOP_FEATURES);
+  barRows($("expl-features"), shown.map((f) => ({
     name: f.feature,
     value: f.contribution,
-    display: (f.contribution >= 0 ? "+" : "") + f.contribution.toFixed(3),
+    display: `${Math.round((Math.abs(f.contribution) / max) * 100)}%`,
+    title: `contribution ${f.contribution >= 0 ? "+" : ""}${f.contribution.toFixed(3)}`,
   })));
 }
+
+$("expl-toggle").addEventListener("click", (ev) => {
+  state.allFeatures = !state.allFeatures;
+  ev.target.textContent = state.allFeatures ? "Top factors only" : "View All factors";
+  drawFeatures();
+});
 function fmtBytes(n) {
   if (n >= 1e9) return `${(n / 1e9).toFixed(2)} GB`;
   if (n >= 1e6) return `${(n / 1e6).toFixed(2)} MB`;
