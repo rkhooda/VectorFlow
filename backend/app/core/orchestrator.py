@@ -1,7 +1,7 @@
 """Runs the analysis pipeline: process → forecast → analyze.
 
-Currently wired to the mocks; Phase 5 swaps each call for the real module
-(docs/implementation-plan.md).
+`backend.app.services` resolves each call to the mock or the real module
+(config.yaml, `modules.<module>.implementation`).
 """
 
 import time
@@ -9,7 +9,7 @@ import uuid
 from pathlib import Path
 
 from backend.app.core import store
-from backend.app.services import mocks
+from backend.app import services
 from contracts import SessionState, SessionStatus
 
 
@@ -24,13 +24,13 @@ def run(input_path: Path, module_config: dict) -> store.Session:
     )
     store.current = session
     try:
-        session.states = mocks.process(input_path, module_config)
+        session.states = services.process(input_path, module_config)
         # precompute results per replay position so result endpoints only index
         for i in range(1, len(session.states) + 1):
             seen = session.states[:i]
-            forecast = mocks.forecast(seen, module_config)
+            forecast = services.forecast(seen, module_config)
             session.forecasts.append(forecast)
-            session.intelligence.append(mocks.analyze(seen, forecast, module_config))
+            session.intelligence.append(services.analyze(seen, forecast, module_config.get("attack_intelligence", {})))
         total = len(session.states)
         session.status.total_windows = total
         session.status.current_window = 1
