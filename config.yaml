@@ -19,6 +19,23 @@ session:
 modules:
   mock_windows: 20
   mock_horizon: 5
+  attack_intelligence:
+    smoothing_windows: 3   # one burst counts 1/3 of a stage's support
+    history_windows: 30    # how far back supported stages are remembered (10s windows)
+    min_evidence: 0.35     # support a stage needs before the traffic corroborates it
+    probability_weight: 2.0  # extra support needed per unit the forecast sits below a stage's band
+    # features whose rise is characteristic of each tactic (data_pipeline names;
+    # the mock's names are listed too so the sample replay escalates until the
+    # real pipeline is wired). Features missing from a state are ignored.
+    stage_signals:
+      TA0043: [Dst Port_nunique, SYN Flag Cnt_sum, flow_count, unique_dst_ports, syn_ratio, flow_rate]
+      TA0001: [RST Flag Cnt_sum, FIN Flag Cnt_sum, SYN Flag Cnt_sum, failed_conn_ratio, syn_ratio]
+      TA0008: [flow_count, PSH Flag Cnt_sum, Tot Fwd Pkts_sum, external_dst_ratio, flow_rate]
+      TA0010: [TotLen Fwd Pkts_sum, TotLen Bwd Pkts_sum, bwd_fwd_pkt_ratio, bytes_per_flow, mean_packet_size]
+    # flagged flows: fan-out or volume flags a flow, a sensitive port only adds to the score
+    fanout_min: 3          # distinct (dst ip, dst port) pairs from one source in a window
+    volume_factor: 3.0     # bytes above this multiple of the window's median flow
+    sensitive_ports: [21, 22, 23, 445, 3389]
 
 replay:
   # seconds of wall-clock time per network-state time window during replay
