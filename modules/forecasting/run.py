@@ -1,6 +1,6 @@
 """
-run.py - VectorFlow entry point
-Usage:  source .venv/bin/activate && python run.py
+run.py - VectorFlow entry point for ML model training and evaluation
+Usage:  python modules/forecasting/run.py
 """
 
 import warnings
@@ -8,30 +8,41 @@ warnings.filterwarnings("ignore")
 
 import os
 import sys
-from dotenv import load_dotenv
 
-load_dotenv()   
+# Ensure local src/ is on sys.path for standalone script execution
+_MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
+_SRC_DIR = os.path.join(_MODULE_DIR, "src")
+if _SRC_DIR not in sys.path:
+    sys.path.insert(0, _SRC_DIR)
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 from sklearn.preprocessing import StandardScaler
 
 import data as D
-import models as M
+import model as M
 import evaluate as E
 import plots as P
 import persist as Persist
 
-
 DATA_PATH  = os.getenv("DATA_PATH",  "data/cic_ids2018_core_training_dataset.csv")
-OUTPUT_DIR = os.getenv("OUTPUT_DIR", "outputs")
-MODEL_DIR  = os.getenv("MODEL_DIR",  "models")
+OUTPUT_DIR = os.getenv("OUTPUT_DIR", os.path.join(_MODULE_DIR, "outputs"))
+MODEL_DIR  = os.getenv("MODEL_DIR",  os.path.join(_MODULE_DIR, "models"))
 
 OUT_FI = os.path.join(OUTPUT_DIR, "feature_importance.png")
 OUT_PR = os.path.join(OUTPUT_DIR, "pr_curves.png")
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
+os.makedirs(MODEL_DIR, exist_ok=True)
 
+if not os.path.exists(DATA_PATH):
+    print(f"Error: Dataset not found at '{DATA_PATH}'.")
+    print("Please set DATA_PATH env var or place the CIC-IDS2018 dataset at the expected path.")
+    sys.exit(1)
 
 df = D.load(DATA_PATH)
 print(f"Loaded {len(df):,} rows, {df.shape[1]} columns")

@@ -139,7 +139,7 @@ if mode == "Upload CSV":
             st.write(f"Loaded {len(df)} rows, {df.shape[1]} columns")
 
             with st.spinner("Running inference..."):
-                preds = predict(df)
+                preds = predict(df, models=["LogReg", "RandomForest", "XGBoost"])
 
             show_batch_results(preds, df)
 
@@ -186,7 +186,7 @@ else:
     if st.button("Run prediction", type="primary"):
         try:
             with st.spinner("Running inference..."):
-                preds = predict(input_vals)
+                preds = predict(input_vals, models=["LogReg", "RandomForest", "XGBoost"])
             show_results(preds)
         except Exception as e:
             st.error(str(e))

@@ -1,13 +1,12 @@
 """
-inference.py — load saved models and run predictions on new traffic windows
+inference.py — Load trained forecasting models lazily and run attack predictions on traffic windows.
 """
 
 import os
 import sys
-import joblib
+from typing import Dict, Any, List, Union
 import numpy as np
 import pandas as pd
-from xgboost import XGBClassifier
 
 FEATURE_COLS = [
     "Tot Fwd Pkts_sum", "Tot Bwd Pkts_sum", "TotLen Fwd Pkts_sum",
@@ -39,17 +38,89 @@ FEATURE_COLS = [
     "PSH Flag Cnt_sum_delta1", "flow_count_delta1", "bwd_fwd_pkt_ratio_delta1",
 ]
 
-MODEL_DIR = os.getenv("MODEL_DIR", os.path.join(os.path.dirname(__file__), "models"))
-_scaler = joblib.load(os.path.join(MODEL_DIR, "scaler.joblib"))
-_logreg = joblib.load(os.path.join(MODEL_DIR, "logreg.joblib"))
-_rf     = joblib.load(os.path.join(MODEL_DIR, "randomforest.joblib"))
-_xgb    = XGBClassifier()
-_xgb.load_model(os.path.join(MODEL_DIR, "xgboost.ubj"))
+DEFAULT_MODEL_DIR = os.getenv("MODEL_DIR", os.path.join(os.path.dirname(__file__), "models"))
 
-THRESHOLD = 0.5
+# Default decision threshold calibrated from validation PR curve (at recall >= 0.5)
+DEFAULT_THRESHOLD = 0.15
+
+_SCALER = None
+_MODELS = {}
 
 
-def predict(features):
+def get_scaler(model_dir: str = None):
+    """Lazily load the StandardScaler."""
+    global _SCALER
+    if _SCALER is None:
+        import joblib
+        dir_path = model_dir or DEFAULT_MODEL_DIR
+        scaler_path = os.path.join(dir_path, "scaler.joblib")
+        if not os.path.exists(scaler_path):
+            raise FileNotFoundError(
+                f"Scaler artifact not found at '{scaler_path}'. "
+                f"Please generate models by running 'python modules/forecasting/run.py'."
+            )
+        _SCALER = joblib.load(scaler_path)
+    return _SCALER
+
+
+def get_model(name: str = "XGBoost", model_dir: str = None):
+    """
+    Lazily load a specific model artifact on first demand.
+    Avoids top-level imports of XGBoost/joblib at package initialization.
+    """
+    global _MODELS
+    if name not in _MODELS:
+        dir_path = model_dir or DEFAULT_MODEL_DIR
+
+        if name == "XGBoost":
+            try:
+                from xgboost import XGBClassifier
+            except ImportError as e:
+                raise ImportError(
+                    "Could not import XGBoost. On macOS, OpenMP is required: "
+                    "install it via 'brew install libomp'."
+                ) from e
+
+            model_path = os.path.join(dir_path, "xgboost.ubj")
+            if not os.path.exists(model_path):
+                raise FileNotFoundError(
+                    f"XGBoost model file not found at '{model_path}'. "
+                    f"Please generate models by running 'python modules/forecasting/run.py'."
+                )
+            model = XGBClassifier()
+            model.load_model(model_path)
+            _MODELS[name] = model
+
+        elif name in ("LogReg", "LogisticRegression"):
+            import joblib
+            model_path = os.path.join(dir_path, "logreg.joblib")
+            if not os.path.exists(model_path):
+                raise FileNotFoundError(f"LogReg model file not found at '{model_path}'.")
+            _MODELS[name] = joblib.load(model_path)
+
+        elif name in ("RandomForest", "RF"):
+            import joblib
+            model_path = os.path.join(dir_path, "randomforest.joblib")
+            if not os.path.exists(model_path):
+                raise FileNotFoundError(f"Random Forest model file not found at '{model_path}'.")
+            _MODELS[name] = joblib.load(model_path)
+
+        else:
+            raise ValueError(f"Unknown model name '{name}'. Supported: 'XGBoost', 'LogReg', 'RandomForest'")
+
+    return _MODELS[name]
+
+
+def predict(
+    features: Union[Dict[str, float], pd.DataFrame],
+    models: List[str] = None,
+    threshold: float = DEFAULT_THRESHOLD,
+    model_dir: str = None,
+) -> pd.DataFrame:
+    """
+    Run prediction on single dict or DataFrame containing required 75 features.
+    Raises ValueError if required features are missing.
+    """
     if isinstance(features, dict):
         df = pd.DataFrame([features])
     elif isinstance(features, pd.DataFrame):
@@ -60,22 +131,26 @@ def predict(features):
     missing = [c for c in FEATURE_COLS if c not in df.columns]
     if missing:
         raise ValueError(
-            f"Input is missing {len(missing)} required feature(s):\n  " +
-            "\n  ".join(missing)
+            f"Input is missing {len(missing)} required feature(s): {missing[:5]}..."
         )
 
+    if models is None:
+        models = ["XGBoost"]
+
+    scaler = get_scaler(model_dir=model_dir)
     X = df[FEATURE_COLS].values.astype(float)
-    X_scaled = _scaler.transform(X)
+    X_scaled = scaler.transform(X)
 
     results = []
-    for name, model in [("LogReg", _logreg), ("RandomForest", _rf), ("XGBoost", _xgb)]:
+    for model_name in models:
+        model = get_model(model_name, model_dir=model_dir)
         proba = model.predict_proba(X_scaled)[:, 1]
-        pred  = (proba >= THRESHOLD).astype(int)
+        pred = (proba >= threshold).astype(int)
         for i, (p, a) in enumerate(zip(proba, pred)):
             results.append({
-                "row":              i,
-                "model":            name,
-                "probability":      round(float(p), 4),
+                "row": i,
+                "model": model_name,
+                "probability": round(float(p), 4),
                 "attack_predicted": bool(a),
             })
 
@@ -85,6 +160,10 @@ def predict(features):
 if __name__ == "__main__":
     DATA_PATH = os.getenv("DATA_PATH", "data/cic_ids2018_core_training_dataset.csv")
 
+    if not os.path.exists(DATA_PATH):
+        print(f"Dataset not found at {DATA_PATH}. Set DATA_PATH environment variable.")
+        sys.exit(1)
+
     raw = pd.read_csv(DATA_PATH)
     raw["window_start"] = pd.to_datetime(raw["window_start"])
     test_rows = (
@@ -93,14 +172,13 @@ if __name__ == "__main__":
         .reset_index(drop=True)
     )
 
-    print(f"Running inference on {len(test_rows)} rows from the test period\n")
-
-    preds = predict(test_rows)
+    print(f"Running inference on {len(test_rows)} test windows\n")
+    preds = predict(test_rows, models=["XGBoost", "RandomForest", "LogReg"])
 
     for i in range(len(test_rows)):
-        ts     = test_rows.loc[i, "window_start"]
+        ts = test_rows.loc[i, "window_start"]
         actual = int(test_rows.loc[i, "Future_Attack_Target"])
-        print(f"Row {i}  |  window_start={ts}  |  actual label={actual}")
+        print(f"Row {i} | window_start={ts} | actual label={actual}")
         row_preds = preds[preds["row"] == i][["model", "probability", "attack_predicted"]]
         print(row_preds.to_string(index=False))
         print()
