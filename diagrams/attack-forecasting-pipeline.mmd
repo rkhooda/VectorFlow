@@ -1,0 +1,13 @@
+graph LR
+  A[CIC-IDS2018 Dataset] --> B[Clean and Preprocess]
+  B --> C[Split into 10-sec Windows]
+  C --> D[Extract Features]
+  D --> E[Past 30-sec Windows]
+  E -->|INPUT| F[[Forecasting Model]]
+  F --> G[LightGBM Baseline]
+  F --> H[LSTM or Transformer]
+  G --> I[Future Attack Probability]
+  H --> I
+  C --> J[Future 30-60s Window]
+  J --> K[Future Attack Label 0 or 1]
+  K -->|TARGET| F
