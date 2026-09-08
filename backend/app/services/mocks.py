@@ -68,7 +68,7 @@ def process(input_path: Path, config: dict) -> list[NetworkState]:
                 packet_count=(packets := rng.randint(10, 500)),
                 byte_count=packets * rng.randint(60, 1500),
             )
-            for f in range(rng.randint(5, 10))
+            for f in range(rng.randint(5, 10) + int(20 * level))
         ]
         states.append(
             NetworkState(
@@ -89,16 +89,21 @@ def process(input_path: Path, config: dict) -> list[NetworkState]:
 
 
 def forecast(states: list[NetworkState], config: dict) -> ForecastResult:
-    """Mock forecasting.forecast(): probability tracks the escalation level.
+    """Mock forecasting.forecast(): how far recent activity sits above the quiet
+    baseline of the capture so far.
 
     Works on any prefix of the capture, so replay (Phase 3) can call it with
-    states seen "so far".
+    states seen "so far", and on real pipeline output, whose feature values are
+    raw counts rather than 0-1 scores.
     """
     if not states:
         raise ValueError("forecast requires at least one network state")
     current = states[-1]
-    signal = sum(current.features.values()) / len(current.features)
-    prob = min(round(signal, 4), 1.0)
+    # ponytail: activity vs 25th-percentile baseline stands in for the model
+    counts = sorted(s.flow_count for s in states)
+    recent = sum(s.flow_count for s in states[-3:]) / len(states[-3:])
+    baseline = counts[len(counts) // 4]
+    prob = round(max(0.0, 1 - baseline / recent), 4) if recent else 0.0
     horizon = [
         ForecastPoint(
             step=step,
