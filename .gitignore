@@ -22,6 +22,7 @@ data/uploads/
 *.onnx
 *.pt
 *.h5
+*.ubj
 
 # Datasets (large, regenerate with modules/data_pipeline/build_training_set.py)
 data/*.csv
