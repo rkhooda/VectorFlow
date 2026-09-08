@@ -25,6 +25,8 @@ def run(input_path: Path, module_config: dict) -> store.Session:
     store.current = session
     try:
         session.states = services.process(input_path, module_config)
+        if not session.states:
+            raise ValueError("no analyzable traffic windows in the capture")
         # precompute results per replay position so result endpoints only index
         for i in range(1, len(session.states) + 1):
             seen = session.states[:i]

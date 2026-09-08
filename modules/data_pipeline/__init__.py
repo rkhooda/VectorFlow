@@ -35,7 +35,14 @@ def extract_features(input_path: Path) -> pd.DataFrame:
     lag from. This is the same rule the training set applies, minus the parts
     that depend on labels (which do not exist at prediction time).
     """
-    from .build_training_set import LABEL_COLS, add_history, feature_columns, load_flows, to_windows
+    from .build_training_set import LABEL_COLS, USECOLS, add_history, feature_columns, load_flows, to_windows
+
+    if input_path.suffix.lower() != ".csv":
+        raise ValueError("only CIC-IDS-2018 flow CSVs are supported; convert PCAP with CICFlowMeter first")
+    with open(input_path, encoding="utf-8", errors="replace") as fh:
+        header = {c.strip() for c in fh.readline().split(",")}
+    if missing := sorted(set(USECOLS) - header):
+        raise ValueError(f"not a CIC-IDS-2018 flow CSV, missing columns: {missing}")
 
     w = to_windows(load_flows(Path(input_path)))
     w = add_history(w, [c for c in w.columns if c not in LABEL_COLS])
