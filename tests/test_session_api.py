@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 import pytest
 
@@ -6,6 +8,7 @@ from backend.app.core.config import get_config
 from backend.app.main import app
 
 client = TestClient(app)
+SAMPLE = Path("data/samples/ssh_bruteforce_2018-02-14.csv")
 
 
 @pytest.fixture(autouse=True)
@@ -18,23 +21,33 @@ def test_status_without_session():
 
 
 def test_create_from_sample():
-    resp = client.post("/api/session", data={"sample": "sample_flows.csv"})
+    resp = client.post("/api/session", data={"sample": "ssh_bruteforce_2018-02-14.csv"})
     assert resp.status_code == 200
     body = resp.json()
     assert body["state"] == "replaying"
     assert body["current_window"] == 1
-    assert body["input_file"] == "sample_flows.csv"
-    assert body["total_windows"] == get_config()["modules"]["mock_windows"]
+    assert body["input_file"] == "ssh_bruteforce_2018-02-14.csv"
+    assert body["total_windows"] > 0
     assert client.get("/api/session/status").json()["session_id"] == body["session_id"]
 
 
-def test_create_from_upload(tmp_path):
+def test_create_from_upload():
+    payload = SAMPLE.read_bytes()
+    resp = client.post("/api/session", files={"file": ("capture.csv", payload, "text/csv")})
+    assert resp.status_code == 200
+    assert resp.json()["state"] == "replaying"
+
+
+def test_unreadable_upload_becomes_session_error():
     resp = client.post(
         "/api/session",
         files={"file": ("capture.csv", b"timestamp,src_ip\n1,10.0.0.1\n", "text/csv")},
     )
     assert resp.status_code == 200
-    assert resp.json()["state"] == "replaying"
+    body = resp.json()
+    assert body["state"] == "error"
+    assert "missing columns" in body["detail"]
+    assert client.get("/api/forecast").status_code == 409
 
 
 def test_rejects_unsupported_extension():
@@ -53,7 +66,7 @@ def test_rejects_neither_and_both():
     assert client.post("/api/session").status_code == 400
     resp = client.post(
         "/api/session",
-        data={"sample": "sample_flows.csv"},
+        data={"sample": "ssh_bruteforce_2018-02-14.csv"},
         files={"file": ("a.csv", b"x", "text/csv")},
     )
     assert resp.status_code == 400

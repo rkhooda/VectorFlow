@@ -51,7 +51,7 @@ def test_index_shows_upload_form():
     assert resp.status_code == 200
     html = resp.get_data(as_text=True)
     assert 'id="session-form"' in html
-    assert "sample_flows.csv" in html  # sample selector is populated
+    assert "ssh_bruteforce_2018-02-14.csv" in html  # sample selector is populated
     assert 'href="/dashboard"' in html
 
 
@@ -109,7 +109,7 @@ def test_results_409_passes_through_when_not_ready(backend_up, monkeypatch):
 
 def test_full_session_flow_through_dashboard(backend_up):
     # start a session through the dashboard proxy
-    resp = client.post("/api/session", data={"sample": "sample_flows.csv"})
+    resp = client.post("/api/session", data={"sample": "ssh_bruteforce_2018-02-14.csv"})
     assert resp.status_code == 200
     body = resp.get_json()
     assert body["state"] == "replaying"
@@ -135,7 +135,7 @@ def test_full_session_flow_through_dashboard(backend_up):
 
     traffic = client.get("/api/traffic/summary").get_json()
     assert traffic["window_count"] >= 1
-    assert traffic["protocol_counts"]
+    assert isinstance(traffic["protocol_counts"], dict)  # empty: CIC flows carry no protocol
 
     netstate = client.get("/api/state/current").get_json()
     assert netstate["window_index"] >= 0

@@ -26,7 +26,7 @@ def fresh_store():
 
 
 def start_session():
-    assert client.post("/api/session", data={"sample": "sample_flows.csv"}).status_code == 200
+    assert client.post("/api/session", data={"sample": "ssh_bruteforce_2018-02-14.csv"}).status_code == 200
 
 
 def set_position(windows_seen: int):
@@ -58,7 +58,7 @@ def test_replay_position_is_consistent_across_endpoints():
     seen = store.current.states[:3]
     assert summary["flow_count"] == sum(s.flow_count for s in seen)
     assert summary["byte_count"] == sum(s.byte_count for s in seen)
-    assert 1 <= len(summary["top_talkers"]) <= 5
+    assert len(summary["top_talkers"]) <= 5  # empty: CIC flows carry no IPs
     expected_flagged = sum(len(i.flagged_flows) for i in store.current.intelligence[:3])
     assert len(client.get("/api/flows/flagged").json()) == expected_flagged
 
@@ -77,9 +77,9 @@ def test_result_shapes_mid_replay():
 
 def test_forecast_escalates_as_replay_advances():
     start_session()
-    set_position(2)
+    set_position(20)  # benign traffic; the SSH brute force starts at window 27
     early = client.get("/api/forecast").json()["infiltration_probability"]
-    set_position(20)
+    set_position(60)
     late = client.get("/api/forecast").json()["infiltration_probability"]
     assert late > early
 

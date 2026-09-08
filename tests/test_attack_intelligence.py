@@ -14,7 +14,7 @@ from modules.data_pipeline.build_training_set import BENIGN, USECOLS
 
 CONFIG = yaml.safe_load(Path("config.yaml").read_text())["modules"]
 AI_CONFIG = CONFIG["attack_intelligence"]
-SAMPLE = Path("data/samples/sample_flows.csv")
+SAMPLE = Path("data/samples/ssh_bruteforce_2018-02-14.csv")
 ORDER = [t for _, t, _ in MITRE_STAGES]
 
 
@@ -72,11 +72,10 @@ def test_contract_on_sample(sample_states):
 
 
 def test_stage_never_goes_backwards_as_probability_rises(sample_states):
-    prev = 0
-    for i in range(1, len(sample_states) + 1):
-        seen = sample_states[:i]
-        idx = ORDER.index(analyze(seen, mocks.forecast(seen, CONFIG), AI_CONFIG).stage.tactic_id)
-        assert idx >= prev  # mock probability rises monotonically across the replay
+    prev, n = 0, len(sample_states)
+    for i in range(1, n + 1):
+        idx = ORDER.index(analyze(sample_states[:i], forecast_of(i / n), AI_CONFIG).stage.tactic_id)
+        assert idx >= prev
         prev = idx
 
 
