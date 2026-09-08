@@ -35,6 +35,14 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+For a machine without internet, build a wheel cache once where you have it
+(about 52 MB) and install from that:
+
+```bash
+pip download -r requirements.txt -d wheels/
+pip install --no-index --find-links wheels -r requirements.txt
+```
+
 ## Run
 
 Two processes, two terminals:
@@ -49,6 +57,29 @@ python dashboard/app.py
 
 Configuration lives in `config.yaml`. No internet access is required at any
 point.
+
+## Demo
+
+Pick `ssh_bruteforce_2018-02-14.csv` on the home page. It is a 13-minute slice
+of the CIC-IDS-2018 Feb 14 capture: 75 ten-second windows, replayed at two
+seconds each (about 2.5 minutes).
+
+- Windows 1–26 are benign. Risk stays low with one brief bump around window
+  13; the stage sits at Reconnaissance or Initial Access.
+- Window 27 (02:01:50) is where the SSH brute force starts. Flows roughly
+  triple, risk climbs above 65% and stays there, and the stage moves through
+  Initial Access and Lateral Movement to Exfiltration.
+- Flagged flows, protocol breakdown and top talkers stay empty: CIC-IDS-2018
+  day files carry no IPs or ports, so per-flow records cannot be rebuilt.
+
+The data pipeline and attack intelligence are the real modules. The risk
+number comes from an activity baseline (`mock-forecaster-v0`) until the
+trained model beats chance on the March test days; the swap is one line in
+`config.yaml`.
+
+Uploading a CSV that is not a CIC-IDS-2018 flow export puts the session in
+the error state with the missing columns named. PCAP must be converted with
+CICFlowMeter first.
 
 ## Tests
 

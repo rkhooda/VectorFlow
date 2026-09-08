@@ -73,7 +73,8 @@ independently.
 ## Verifying your module
 
 1. `pip install -r requirements.txt` in the repo venv.
-2. Run the contract tests: `pytest tests/` — they call your entry point on a
-   sample file from `data/samples/` and validate the returned contract types.
+2. Run the contract tests: `pytest tests/` — they call your entry point on
+   `data/samples/ssh_bruteforce_2018-02-14.csv` and validate the returned
+   contract types.
 3. Run the full app (README) and confirm the dashboard shows your real
    output instead of mock data.

@@ -115,6 +115,9 @@ panels and their modules.
 - **Tested**: same contract + e2e tests, now against real modules.
 - **Done when**: all three switches point at real modules and everything
   is green.
+- **Status**: data_pipeline ✅ and attack_intelligence ✅ are real.
+  forecasting stays mocked until the model clears chance on the March test
+  days (`modules/forecasting/README.md`).
 
 ## Phase 6 — Hardening & demo preparation
 
