@@ -36,7 +36,7 @@ Backend inference dependencies are included in the root `requirements.txt`:
 > brew install libomp
 > ```
 
-Optional development and UI demo dependencies (`streamlit`, `matplotlib`, `seaborn`, `python-dotenv`) are listed in `modules/forecasting/requirements.txt`:
+Optional development and UI demo dependencies (`streamlit`, `matplotlib`, `python-dotenv`) are listed in `modules/forecasting/requirements.txt`:
 ```bash
 pip install -r modules/forecasting/requirements.txt
 ```
@@ -72,11 +72,9 @@ streamlit run modules/forecasting/app.py
 
 ### Chronological Split (No Data Leakage)
 
-| Split | Included Dates | Rows | Positives | Positive Rate |
-|---|---|---|---|---|
-| **Train** | Feb 14, Feb 15, Feb 22, Feb 23 | 11,296 | ~995 | ~8.8% |
-| **Validation** | Feb 28 | 2,526 | 213 | ~8.4% |
-| **Test** | Mar 01, Mar 02 | 3,473 | ~38 | ~1.1% |
+- **Train**: Feb 14, Feb 15, Feb 22, Feb 23
+- **Validation**: Feb 28
+- **Test**: Mar 01, Mar 02
 
 > **Known Exclusions**:
 > - `2018-02-21`: Excluded (contains only 61 rows, 100% positive, truncated artifact).
@@ -84,33 +82,15 @@ streamlit run modules/forecasting/app.py
 
 ---
 
-## Model Benchmark & Empirical Findings
+## Model Benchmark
 
-### Performance Comparison Across Splits
-
-Due to severe class imbalance and temporal shift, standard accuracy is misleading (a dummy all-negative classifier reaches >98% accuracy on test days while detecting zero attacks). PR-AUC, ROC-AUC, and threshold-calibrated Recall/F1 are the primary metrics.
-
-| Model | Split | ROC-AUC | PR-AUC | Default Threshold (0.5)<br>Precision / Recall / F1 | Tuned Threshold (0.15)<br>Precision / Recall / F1 | Max Prob Observed |
-|---|---|---|---|---|---|---|
-| **Logistic Regression** | Train<br>Val (Feb 28)<br>Test (Mar 01–02) | 0.81<br>0.64<br>0.52 | 0.28<br>0.12<br>0.01 | 0.15 / 0.72 / 0.25<br>0.00 / 0.00 / 0.00<br>0.00 / 0.00 / 0.00 | 0.18 / 0.65 / 0.28<br>0.10 / 0.42 / 0.16<br>0.02 / 0.35 / 0.04 | 0.89<br>0.48<br>0.24 |
-| **Random Forest** | Train<br>Val (Feb 28)<br>Test (Mar 01–02) | 0.99<br>0.73<br>0.55 | 0.94<br>0.24<br>0.01 | 0.92 / 0.86 / 0.89<br>0.00 / 0.00 / 0.00<br>0.00 / 0.00 / 0.00 | 0.65 / 0.96 / 0.77<br>0.18 / 0.54 / 0.27<br>0.03 / 0.40 / 0.06 | 0.96<br>0.49<br>0.20 |
-| **XGBoost** | Train<br>Val (Feb 28)<br>Test (Mar 01–02) | 0.98<br>0.74<br>0.57 | 0.91<br>0.27<br>0.02 | 0.88 / 0.81 / 0.84<br>0.00 / 0.00 / 0.00<br>0.00 / 0.00 / 0.00 | 0.58 / 0.92 / 0.71<br>0.21 / 0.56 / 0.31<br>0.04 / 0.42 / 0.07 | 0.95<br>0.52<br>0.25 |
-
-### Analysis of Test Days (March 01 & 02) and Distribution Shift
-
-1. **The 0.5 Threshold Issue**:
-   - On evaluation days, the maximum probability assigned across the entire day rarely exceeds `0.20`–`0.25`.
-   - At the default `0.5` decision boundary, **all models output zero true positives (Recall = 0, F1 = 0)**.
-2. **Temporal Attack Shift**:
-   - **Training Days (Feb 14–23)** contain voluminous DoS (HTTP/LOIC) and Brute Force attacks causing drastic spikes in flag counts, flow rates, and packet deltas.
-   - **Test Days (Mar 01–02)** represent subtle Infiltration attacks (e.g., internal host compromise via dropbox / Metasploit) where network traffic behaves almost identically to benign background traffic, resulting in low raw probabilities and a test ROC-AUC drop to ~0.55–0.57.
-3. **Calibrated Decision Threshold**:
-   - By calibrating the decision threshold from the validation precision-recall curve at `threshold = 0.15` (instead of `0.50`), the system recovers practical detection recall (40–56% recall) while alerting downstream analysts.
-4. **Top Discriminative Features**:
-   - `RST Flag Cnt_sum` (and lags 1–3)
-   - `Flow IAT Mean_mean` (and lags 1–3)
-   - `Dst Port_nunique` (destination port diversity)
-   - `Tot Fwd Pkts_sum_delta1`
+Benchmark numbers are pending. The tables previously listed here were not
+produced from `data/cic_ids2018_core_training_dataset.csv`, so they were
+removed. Regenerate them with `python modules/forecasting/run.py` on that file
+and paste the printed comparison table and confusion matrices here, including
+the March 01–02 test split. Early runs rank test-day windows near chance and
+the 0.15 alert threshold fires on roughly a quarter of all windows, so the
+backend keeps the mock forecaster until this improves.
 
 ---
 
