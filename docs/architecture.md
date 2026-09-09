@@ -61,8 +61,10 @@ source of truth for every module boundary.
 - No network calls to anything except `localhost` (dashboard → backend).
 - All dependencies pinned in `requirements.txt`; installable from a local
   wheel cache if needed (`pip download -r requirements.txt -d wheels/`).
-- No CDN assets: any CSS/JS the dashboard needs is vendored in
-  `dashboard/static/`.
+- No CDN assets: any CSS, JS and web font the dashboard needs is vendored in
+  `dashboard/static/` (fonts in `dashboard/static/fonts/`, see its README).
+  Verify by loading the dashboard with external DNS blackholed:
+  `--host-resolver-rules="MAP * ~NOTFOUND, EXCLUDE 127.0.0.1"` in Chrome.
 - Reproducible configuration in `config.yaml`; no environment-dependent state.
 
 ## Out of scope (deliberately)

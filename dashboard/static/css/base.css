@@ -1,8 +1,50 @@
 /* Design tokens shared by the landing page and the dashboard.
    Suisse Intl Trial is licensed; Inter is the closest free substitute, so the
-   stack names both and falls back on system sans. */
+   stack names both and falls back on system sans.
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap");
+   Fonts are vendored in ../fonts/ and served from this repo: the dashboard must
+   run on an air-gapped machine, so it may not reach a CDN. Latin subset only —
+   the UI is English. See ../fonts/README.md. */
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/inter-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../fonts/inter-500.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../fonts/inter-600.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/geist-mono-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../fonts/geist-mono-500.woff2") format("woff2");
+}
 
 :root {
   --page: #f9f9f9;
