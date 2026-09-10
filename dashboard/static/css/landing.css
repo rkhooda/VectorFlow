@@ -459,13 +459,40 @@
   50%, 100% { translate: 1314px 0; opacity: 0; }
 }
 
-/* the ASCII plots breathe rather than sit flat */
-.decor-dots img { animation: decor-breathe 11s ease-in-out infinite; }
-.decor-flow { animation: decor-breathe 14s ease-in-out -5s infinite; }
+/* The ASCII plots are flat PNGs, so the glyphs themselves cannot move: a
+   highlight band is swept through a mask instead, which reads as traffic
+   running along the plot. Mask is 3x the element, so sliding it one full
+   width walks the band edge to edge. */
 
-@keyframes decor-breathe {
-  0%, 100% { opacity: 0.72; }
-  50%      { opacity: 1; }
+.decor-flow,
+.decor-dots img {
+  mask-image: linear-gradient(
+    var(--sweep-angle), rgba(0, 0, 0, 0.6) 32%, #000 50%, rgba(0, 0, 0, 0.6) 68%);
+  mask-size: 300% 300%;
+  animation: decor-sweep 9s linear infinite;
+}
+
+.decor-flow { --sweep-angle: 100deg; }
+
+/* the dot matrix is twice its container and clipped, so it can also creep
+   sideways — the plot reads as a feed scrolling under the sweep */
+.decor-dots img {
+  --sweep-angle: 170deg;
+  animation-name: decor-sweep, decor-creep;
+  animation-duration: 13s, 28s;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: normal, alternate;
+}
+
+@keyframes decor-creep {
+  from { translate: 0; }
+  to   { translate: -48px; }
+}
+
+@keyframes decor-sweep {
+  from { mask-position: 100% 100%; }
+  to   { mask-position: 0% 0%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -473,6 +500,7 @@
     animation: none;
   }
   .beam { display: none; }
+  .decor-dots img, .decor-flow { mask-image: none; }
 }
 
 /* ---------- hero entrance ----------
