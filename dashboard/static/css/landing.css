@@ -474,3 +474,23 @@
   }
   .beam { display: none; }
 }
+
+/* ---------- hero entrance ----------
+   One rise, staggered down the column, so the page settles instead of
+   snapping in. Runs once on load; nothing depends on it. */
+
+.badge, .hero-title, .hero-sub, .upload-card {
+  animation: hero-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+.hero-title  { animation-delay: 80ms; }
+.hero-sub    { animation-delay: 160ms; }
+.upload-card { animation-delay: 240ms; }
+
+@keyframes hero-rise {
+  from { opacity: 0; translate: 0 12px; }
+  to   { opacity: 1; translate: 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge, .hero-title, .hero-sub, .upload-card { animation: none; }
+}
