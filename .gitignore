@@ -30,3 +30,4 @@ data/*.parquet
 data/raw/
 data/*.README.md
 wheels/
+.playwright-mcp/

@@ -366,3 +366,111 @@
   .upload-card { flex-direction: column; align-items: stretch; }
   .upload-submit { justify-content: center; }
 }
+
+/* ---------- backdrop motion ----------
+   Everything here is decorative and additive: the static layout above is the
+   design of record, these rules only move it. Offsets are multiples of the
+   101px grid cell so the markers always land on an intersection.
+   Individual `translate`/`rotate`/`scale` properties are used so the travel
+   path and the twinkle can animate independently on the same element. */
+
+.grid-marker {
+  animation-duration: 32s, 6s;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1), ease-in-out;
+  animation-iteration-count: infinite;
+}
+/* each marker walks its own gutter — the centre columns belong to the copy */
+.grid-marker-l { animation-name: marker-walk-l, marker-twinkle; }
+.grid-marker-r {
+  animation-name: marker-walk-r, marker-twinkle;
+  animation-duration: 41s, 7.5s;
+  animation-delay: -14s, -2s;
+}
+
+/* one cell per leg, holding at each intersection */
+@keyframes marker-walk-l {
+  0%,   8%  { translate: 0 0; }
+  17%,  33% { translate: -101px 0; }
+  42%,  58% { translate: -101px 101px; }
+  67%,  83% { translate: 0 101px; }
+  92%, 100% { translate: 0 0; }
+}
+
+@keyframes marker-walk-r {
+  0%,   8%  { translate: 0 101px; }
+  17%,  33% { translate: 101px 101px; }
+  42%,  58% { translate: 101px 0; }
+  67%,  83% { translate: 0 0; }
+  92%, 100% { translate: 0 101px; }
+}
+
+@keyframes marker-twinkle {
+  0%, 100% { rotate: 0deg;  scale: 1; opacity: 1; }
+  50%      { rotate: 90deg; scale: 1.12; opacity: 0.75; }
+}
+
+/* terminal-style flicker: mostly lit, with a short stutter each cycle */
+.grid-label { animation: label-flicker 9s steps(1, end) infinite; }
+.grid-label-bl { animation-delay: -1.4s; }
+.grid-label-tr { animation-delay: -4.1s; }
+.grid-label-br { animation-delay: -6.7s; }
+
+@keyframes label-flicker {
+  0%, 71%, 74%, 77%, 100% { opacity: 1; }
+  72%, 76%                { opacity: 0.25; }
+  92%                     { opacity: 0.55; }
+  94%                     { opacity: 1; }
+}
+
+/* a packet running the grid lines — one vertical, one horizontal, each
+   visible for only part of its cycle so the backdrop stays quiet */
+.beam {
+  position: absolute;
+  opacity: 0;
+}
+.beam-v {
+  top: 36px;
+  left: 280px;
+  width: 1px;
+  height: 140px;
+  background: linear-gradient(to bottom, transparent, var(--accent));
+  animation: beam-v 13s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+.beam-h {
+  top: 237px;
+  left: 78px;
+  width: 180px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--accent));
+  animation: beam-h 17s cubic-bezier(0.4, 0, 0.6, 1) -6s infinite;
+}
+
+@keyframes beam-v {
+  0%       { translate: 0 -140px; opacity: 0; }
+  12%      { opacity: 0.28; }
+  46%      { opacity: 0.28; }
+  58%, 100% { translate: 0 606px; opacity: 0; }
+}
+
+@keyframes beam-h {
+  0%       { translate: -180px 0; opacity: 0; }
+  10%      { opacity: 0.22; }
+  40%      { opacity: 0.22; }
+  50%, 100% { translate: 1314px 0; opacity: 0; }
+}
+
+/* the ASCII plots breathe rather than sit flat */
+.decor-dots img { animation: decor-breathe 11s ease-in-out infinite; }
+.decor-flow { animation: decor-breathe 14s ease-in-out -5s infinite; }
+
+@keyframes decor-breathe {
+  0%, 100% { opacity: 0.72; }
+  50%      { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grid-marker, .grid-label, .beam, .decor-dots img, .decor-flow {
+    animation: none;
+  }
+  .beam { display: none; }
+}
