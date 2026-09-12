@@ -8,6 +8,7 @@ lead and land in this package first, in their own commit.
 
 from datetime import datetime
 from enum import Enum
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -56,9 +57,17 @@ class ForecastResult(BaseModel):
 
     model_config = ConfigDict(protected_namespaces=())
 
-    infiltration_probability: float = Field(ge=0.0, le=1.0)
+    infiltration_probability: float | None = Field(default=None, ge=0.0, le=1.0)
     horizon: list[ForecastPoint]  # future timeline, ordered by step
     model_name: str
+    prediction: bool | None = None
+    threshold: float | None = Field(default=None, ge=0.0, le=1.0)
+    forecast_horizon_seconds: dict[str, int] = Field(default_factory=lambda: {"min": 30, "max": 60})
+    sequence_length: int | None = Field(default=None, ge=1)
+    forecast_ready: bool = True
+    status_message: str | None = None
+    model_mode: str = "real"
+    model_version: str | None = None
 
 
 class AttackStagePrediction(BaseModel):
@@ -67,6 +76,7 @@ class AttackStagePrediction(BaseModel):
     tactic_id: str  # e.g. "TA0001"
     tactic_name: str  # e.g. "Initial Access"
     confidence: float = Field(ge=0.0, le=1.0)
+    mitre_technique: str | None = None
 
 
 class FeatureContribution(BaseModel):
@@ -95,6 +105,7 @@ class IntelligenceResult(BaseModel):
     stage: AttackStagePrediction
     explanation: Explanation
     flagged_flows: list[FlaggedFlow]
+    forecast_ready: bool = True
 
 
 class TrafficSummary(BaseModel):
@@ -128,3 +139,49 @@ class SessionStatus(BaseModel):
     total_windows: int = Field(default=0, ge=0)
     current_window: int = Field(default=0, ge=0)  # replay position, 0-based
     detail: str | None = None  # human-readable progress or error message
+
+
+class SecurityAlert(BaseModel):
+    """A deduplicated forecast alert emitted by the backend."""
+
+    alert_id: str
+    timestamp: datetime
+    attack_probability: float = Field(ge=0.0, le=1.0)
+    predicted_stage: str
+    mitre_technique: str | None = None
+    model_name: str
+    model_version: str | None = None
+    severity: str
+    status: str = "forecast"
+
+
+class EvidenceRecord(BaseModel):
+    """Compact off-chain evidence metadata and its tamper-evident hash."""
+
+    alert_id: str
+    timestamp: datetime
+    attack_probability: float = Field(ge=0.0, le=1.0)
+    predicted_stage: str
+    mitre_technique: str | None = None
+    model_version: str | None = None
+    important_features: list[FeatureContribution] = Field(default_factory=list)
+    evidence_hash: str
+    ledger_status: str
+    transaction_id: str | None = None
+
+
+class BlockchainVerification(BaseModel):
+    alert_id: str
+    verified: bool
+    evidence_hash: str | None = None
+    stored_hash: str | None = None
+    message: str
+
+
+class SystemHealth(BaseModel):
+    status: str
+    version: str
+    model: str
+    model_mode: str
+    blockchain: str
+    replay: str

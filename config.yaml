@@ -22,12 +22,9 @@ modules:
   data_pipeline:
     implementation: real  # mock | real
   forecasting:
-    # mock | real. `real` loads modules/forecasting/models/{scaler.joblib,
-    # xgboost.ubj}, which are gitignored: build them with
-    # `python modules/forecasting/run.py` first, or the session errors with the
-    # missing path. Stays `mock` until the trained model beats chance on the
-    # March test days (modules/forecasting/README.md).
-    implementation: mock
+    # real loads the canonical LSTM artifacts; mock is an explicit fallback.
+    implementation: real
+    artifacts_dir: lstm/artifacts
   attack_intelligence:
     implementation: real  # mock | real
     smoothing_windows: 3   # one burst counts 1/3 of a stage's support
@@ -50,3 +47,8 @@ modules:
 replay:
   # seconds of wall-clock time per network-state time window during replay
   seconds_per_window: 2
+
+blockchain:
+  enabled: true
+  ledger_path: data/blockchain/ledger.json
+  alert_threshold: 0.10
