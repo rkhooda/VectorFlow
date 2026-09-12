@@ -2,7 +2,14 @@
 
 from dataclasses import dataclass, field
 
-from contracts import ForecastResult, IntelligenceResult, NetworkState, SessionStatus
+from contracts import (
+    EvidenceRecord,
+    ForecastResult,
+    IntelligenceResult,
+    NetworkState,
+    SecurityAlert,
+    SessionStatus,
+)
 
 
 @dataclass
@@ -10,8 +17,10 @@ class Session:
     status: SessionStatus
     states: list[NetworkState] = field(default_factory=list)
     # index i → result computed on the windows seen up to and including i
-    forecasts: list[ForecastResult] = field(default_factory=list)
-    intelligence: list[IntelligenceResult] = field(default_factory=list)
+    forecasts: list[ForecastResult | None] = field(default_factory=list)
+    intelligence: list[IntelligenceResult | None] = field(default_factory=list)
+    alerts: list[SecurityAlert] = field(default_factory=list)
+    evidence: dict[str, EvidenceRecord] = field(default_factory=dict)
     replay_started: float = 0.0  # time.monotonic() when replay began
 
 

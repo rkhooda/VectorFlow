@@ -122,14 +122,20 @@ def test_full_session_flow_through_dashboard(backend_up):
 
     # every result panel endpoint answers with contract-shaped data
     forecast = client.get("/api/forecast").get_json()
-    assert 0.0 <= forecast["infiltration_probability"] <= 1.0
-    assert forecast["horizon"]
+    if forecast["forecast_ready"]:
+        assert 0.0 <= forecast["infiltration_probability"] <= 1.0
+        assert forecast["horizon"]
+    else:
+        assert forecast["infiltration_probability"] is None
+        assert "Collecting" in forecast["status_message"]
 
     stage = client.get("/api/stage").get_json()
     assert stage["tactic_id"] and stage["tactic_name"]
 
     expl = client.get("/api/explanations").get_json()
-    assert expl["summary"] and expl["top_features"]
+    assert expl["summary"]
+    if forecast["forecast_ready"]:
+        assert expl["top_features"]
 
     assert client.get("/api/flows/flagged").status_code == 200
 

@@ -116,6 +116,12 @@ def forecast(states: list[NetworkState], config: dict) -> ForecastResult:
         infiltration_probability=prob,
         horizon=horizon,
         model_name="mock-forecaster-v0",
+        prediction=prob >= 0.5,
+        threshold=0.5,
+        forecast_horizon_seconds={"min": 30, "max": 60},
+        forecast_ready=True,
+        model_mode="demo",
+        model_version="mock-forecaster-v0",
     )
 
 

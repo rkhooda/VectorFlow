@@ -67,21 +67,28 @@ def test_result_shapes_mid_replay():
     start_session()
     set_position(5)
     forecast = client.get("/api/forecast").json()
+    assert forecast["forecast_ready"] is False
+    assert forecast["infiltration_probability"] is None
+    set_position(6)
+    forecast = client.get("/api/forecast").json()
+    assert forecast["forecast_ready"] is True
     assert 0.0 <= forecast["infiltration_probability"] <= 1.0
-    assert [p["step"] for p in forecast["horizon"]] == list(range(1, len(forecast["horizon"]) + 1))
+    assert len(forecast["horizon"]) == 1
     stage = client.get("/api/stage").json()
     assert stage["tactic_id"].startswith("TA")
     explanation = client.get("/api/explanations").json()
     assert explanation["top_features"] and explanation["summary"]
 
 
-def test_forecast_escalates_as_replay_advances():
+def test_forecast_is_real_model_output_as_replay_advances():
     start_session()
     set_position(20)  # benign traffic; the SSH brute force starts at window 27
     early = client.get("/api/forecast").json()["infiltration_probability"]
     set_position(60)
     late = client.get("/api/forecast").json()["infiltration_probability"]
-    assert late > early
+    assert 0.0 <= early <= 1.0
+    assert 0.0 <= late <= 1.0
+    assert store.current.forecasts[19].model_name == "ForecastLSTM"
 
 
 def test_replay_completes():

@@ -40,7 +40,7 @@ async def create_session(
         if not input_path.is_file():
             raise HTTPException(404, f"sample '{Path(sample).name}' not found")
 
-    session = orchestrator.run(input_path, cfg.get("modules", {}))
+    session = orchestrator.run(input_path, cfg)
     return session.status
 
 

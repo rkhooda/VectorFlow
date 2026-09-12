@@ -4,7 +4,7 @@ from collections import Counter
 
 from fastapi import APIRouter, HTTPException
 
-from backend.app.core import replay, store
+from backend.app.core import orchestrator, replay, store
 from backend.app.core.config import get_config
 from contracts import (
     AttackStagePrediction,
@@ -27,6 +27,7 @@ def _position() -> tuple[store.Session, int]:
     if session.status.state not in (SessionState.replaying, SessionState.completed):
         raise HTTPException(409, f"session not ready (state: {session.status.state.value})")
     idx = replay.advance(session, get_config()["replay"]["seconds_per_window"])
+    orchestrator.ensure_results(session, idx, get_config())
     return session, idx
 
 

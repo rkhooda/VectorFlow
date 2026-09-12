@@ -43,6 +43,18 @@ def analyze(states: list[NetworkState], forecast: ForecastResult, config: dict) 
     """Entry point (docs/integration.md)."""
     if not states:
         raise ValueError("analyze requires at least one network state")
+    if not forecast.forecast_ready or forecast.infiltration_probability is None:
+        return IntelligenceResult(
+            stage=AttackStagePrediction(
+                tactic_id="TA0043", tactic_name="Reconnaissance", confidence=0.0
+            ),
+            explanation=Explanation(
+                top_features=[],
+                summary=forecast.status_message or "Collecting historical context before forecasting.",
+            ),
+            flagged_flows=[],
+            forecast_ready=False,
+        )
     prob = forecast.infiltration_probability
     signals = config.get("stage_signals", STAGE_SIGNALS)
     smoothing = config.get("smoothing_windows", 3)
