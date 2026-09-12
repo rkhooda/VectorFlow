@@ -17,6 +17,7 @@ env/
 
 # Runtime data & model artifacts
 data/uploads/
+data/blockchain/
 *.pkl
 *.joblib
 *.onnx

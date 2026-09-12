@@ -32,6 +32,8 @@ PROXY_GET_PATHS = {
     "/api/explanations",
     "/api/flows/flagged",
     "/api/traffic/summary",
+    "/api/alerts",
+    "/api/evidence",
 }
 
 
@@ -56,7 +58,7 @@ def dashboard():
 @app.route("/api/<path:path>")
 def proxy_get(path):
     full = f"/api/{path}"
-    if full not in PROXY_GET_PATHS:
+    if full not in PROXY_GET_PATHS and not (path.startswith("evidence/") and path.endswith("/verify")):
         abort(404)
     body, status = api_client.proxy_get(full)
     return jsonify(body), status

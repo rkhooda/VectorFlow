@@ -18,7 +18,7 @@ Two local processes, both from one repo, one venv, one `config.yaml`:
                                                      ┌──────────────┴──────────────┐
                                                      │  modules/ (teammates' code) │
                                                      │  · data_pipeline            │
-                                                     │  · forecasting              │
+                                                     │  · forecasting (LSTM)       │
                                                      │  · attack_intelligence      │
                                                      └─────────────────────────────┘
 ```
@@ -39,14 +39,16 @@ PCAP/CSV file (upload or data/samples/)
    ▼
 backend orchestrator
    │  data_pipeline.process(raw)            → list[NetworkState]   (time windows)
-   │  forecasting.forecast(states)          → ForecastResult       (probability + horizon)
+   │  forecasting.forecast(states)          → ForecastResult       (warm-up or real probability)
    │  attack_intelligence.analyze(...)      → AttackStagePrediction, Explanation, FlaggedFlows
    ▼
 replay engine (simulated clock advances one time window at a time)
    │  results per window stored in the in-memory session store
    ▼
-JSON API  (/api/state/current, /api/forecast, /api/stage, /api/explanations,
-           /api/flows/flagged, /api/traffic/summary, /api/session/status)
+   alert → local hash-linked evidence ledger
+   ▼
+   JSON API  (/api/state/current, /api/forecast, /api/stage, /api/explanations,
+           /api/flows/flagged, /api/traffic/summary, /api/alerts, /api/evidence)
    ▼
 Flask dashboard polls and renders: replay status, current state, attack
 probability, forecast timeline, predicted MITRE ATT&CK stage, contributing

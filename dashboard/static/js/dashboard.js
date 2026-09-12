@@ -80,13 +80,15 @@ async function poll() {
 }
 
 async function refreshResults(status) {
-  const [forecast, stage, expl, flagged, traffic, netstate] = await Promise.all([
+  const [forecast, stage, expl, flagged, traffic, netstate, alerts, evidence] = await Promise.all([
     api("/api/forecast"),
     api("/api/stage"),
     api("/api/explanations"),
     api("/api/flows/flagged"),
     api("/api/traffic/summary"),
     api("/api/state/current"),
+    api("/api/alerts"),
+    api("/api/evidence"),
   ]);
   // 409 = session no longer ready (e.g. restarted mid-poll): skip this round
   if (forecast.status === 409) return;
@@ -100,6 +102,7 @@ async function refreshResults(status) {
     recordObserved(status, forecast.body);
     renderTimeline(forecast.body, status);
   }
+  if (alerts.ok && evidence.ok) renderEvidence(alerts.body, evidence.body);
 }
 
 /* ---------- network status panel ---------- */
@@ -130,10 +133,9 @@ function renderStatus(status) {
 function recordObserved(status, forecast) {
   if (status.current_window !== state.lastWindow) {
     state.lastWindow = status.current_window;
-    state.observed.push({
-      window: status.current_window,
-      probability: forecast.infiltration_probability,
-    });
+    if (forecast.forecast_ready && typeof forecast.infiltration_probability === "number") {
+      state.observed.push({ window: status.current_window, probability: forecast.infiltration_probability });
+    }
   }
 }
 
@@ -146,6 +148,14 @@ const SEVERITIES = [
 ];
 
 function renderRisk(forecast) {
+  if (!forecast.forecast_ready || typeof forecast.infiltration_probability !== "number") {
+    $("risk-value").textContent = "Collecting…";
+    $("risk-severity").textContent = "warm-up";
+    $("risk-severity").className = "pill";
+    $("risk-model").textContent = forecast.model_name;
+    $("risk-horizon").textContent = "30–60 seconds";
+    return;
+  }
   const p = forecast.infiltration_probability;
   $("risk-value").textContent = `${(p * 100).toFixed(1)}%`;
   const [, label, cls] = SEVERITIES.find(([bound]) => p < bound);
@@ -153,6 +163,8 @@ function renderRisk(forecast) {
   pill.textContent = `${label} risk`;
   pill.className = `pill ${cls}`;
   $("risk-model").textContent = forecast.model_name;
+  const horizon = forecast.forecast_horizon_seconds || {min: 30, max: 60};
+  $("risk-horizon").textContent = `${horizon.min}–${horizon.max} seconds`;
 }
 
 /* Risk-over-time chart. The x axis is seconds relative to the current replay
@@ -178,14 +190,14 @@ function smoothPath(pts) {
 }
 
 function renderTimeline(forecast, status) {
-  const observed = state.observed;
+  const observed = state.observed.filter((item) => typeof item.probability === "number");
   if (!observed.length) return;
 
   const horizon = forecast.horizon || [];
   const now = status.current_window;
   const { l, r, t, b } = PLOT;
   const xMin = (observed[0].window - now) * SEC_PER_WINDOW;
-  const xMax = horizon.length * SEC_PER_WINDOW;
+  const xMax = forecast.forecast_horizon_seconds?.max || horizon.length * SEC_PER_WINDOW;
   const X = (s) => l + ((s - xMin) / Math.max(xMax - xMin, 1)) * (r - l);
   const Y = (p) => b - p * (b - t);
 
@@ -213,7 +225,7 @@ function renderTimeline(forecast, status) {
   const last = observed[observed.length - 1];
   const seen = observed.map((o) => [X((o.window - now) * SEC_PER_WINDOW), Y(o.probability)]);
   const ahead = [[X(0), Y(last.probability)]].concat(
-    horizon.map((h, i) => [X((i + 1) * SEC_PER_WINDOW), Y(h.probability)])
+    horizon.map((h) => [X(xMax / 2), Y(h.probability)])
   );
 
   const curve = smoothPath(seen);
@@ -236,6 +248,7 @@ function renderTimeline(forecast, status) {
 function renderStage(stage) {
   $("stage-name").textContent = stage.tactic_name;
   $("stage-id").textContent = `(${stage.tactic_id})`;
+  $("stage-technique").textContent = stage.mitre_technique || "Not inferred from available evidence";
 
   const trail = state.stageTrail;
   if (trail[trail.length - 1] !== stage.tactic_name) trail.push(stage.tactic_name);
@@ -361,6 +374,23 @@ function renderTraffic(summary) {
     li.textContent = ip;
     return li;
   }));
+}
+
+function renderEvidence(alerts, evidence) {
+  const alert = alerts[alerts.length - 1];
+  const record = alert && evidence.find((item) => item.alert_id === alert.alert_id);
+  $("evidence-id").textContent = alert ? alert.alert_id : "No forecast alert yet";
+  $("evidence-status").textContent = record ? record.ledger_status : "Waiting for a deduplicated alert";
+  const button = $("evidence-verify");
+  button.disabled = !record || !record.transaction_id;
+  button.onclick = async () => {
+    if (!record) return;
+    const result = await api(`/api/evidence/${encodeURIComponent(record.alert_id)}/verify`);
+    if (result.ok) {
+      $("evidence-verification").textContent = result.body.message;
+      $("evidence-verification").className = result.body.verified ? "verified" : "unverified";
+    }
+  };
 }
 
 /* ---------- boot ---------- */

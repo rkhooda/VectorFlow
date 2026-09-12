@@ -88,13 +88,14 @@
           <h2>Attack risk</h2>
           <div id="risk-value">—</div>
           <p class="risk-tag"><span id="risk-severity" class="pill">no data</span></p>
-          <p class="panel-sub">Probability of network infiltration at the current replay position
+          <p class="panel-sub">Probability of a new attack onset within <strong id="risk-horizon">30–60 seconds</strong>
             (<span id="risk-model">—</span>).</p>
         </section>
 
         <section id="attack-stage" class="panel panel-inset">
           <h2 class="panel-sub">Current Stage</h2>
           <p class="stage-current"><span id="stage-name">—</span><span id="stage-id"></span></p>
+          <p class="panel-sub">MITRE technique: <span id="stage-technique">Not inferred from available evidence</span></p>
           <ol id="stage-trail" class="stage-list"><li class="muted">no stages yet</li></ol>
         </section>
       </div>
@@ -138,6 +139,21 @@
           </tbody>
         </table>
       </div>
+    </section>
+
+    <div class="gap"></div>
+
+    <section id="blockchain-evidence" class="panel panel-boxed">
+      <div class="panel-head-row">
+        <h2 class="panel-title-lg">Blockchain evidence ledger</h2>
+        <span class="pill" id="evidence-verification">Not verified</span>
+      </div>
+      <p class="panel-sub">Only compact alert metadata and its deterministic hash are recorded locally; raw traffic stays off-chain.</p>
+      <dl class="kv">
+        <div class="kv-row"><dt>Alert / evidence ID</dt><dd id="evidence-id">No forecast alert yet</dd></div>
+        <div class="kv-row"><dt>Ledger status</dt><dd id="evidence-status">Waiting for a deduplicated alert</dd></div>
+      </dl>
+      <button class="chip chip-primary" id="evidence-verify" type="button" disabled>Verify evidence</button>
     </section>
 
     <div class="gap"></div>

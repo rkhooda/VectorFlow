@@ -9,10 +9,9 @@ into the application. Read this before writing module code.
 - The backend **imports it in-process** — no services, no ports, no Docker.
 - The boundary between us is a **typed contract**: Pydantic models defined in
   `contracts/` plus one entry-point function per module (below).
-- Until your module is ready, the backend runs a **mock** with the same
-  signature (`backend/app/services/`), so backend/dashboard development never
-  blocks on you — and you can develop/test against the same contract without
-  running the app.
+- A clearly labelled **mock** with the same signature remains available in
+  `backend/app/services/` for development, but the checked-in application
+  configuration selects the finalized LSTM in real mode.
 
 Rules:
 
@@ -65,10 +64,9 @@ confidence), `Explanation` (top contributing features/reasons), and
 
 ## How your module gets swapped in
 
-`backend/app/services/` selects the implementation: mock by default, your
-real module once it exists (a one-line switch per module, controlled from
-`config.yaml`). Swap order can be arbitrary — each module is replaced
-independently.
+`backend/app/services/` selects `real` or `mock` independently from
+`config.yaml`. Missing real artifacts produce a clear session error; there is
+no silent fake prediction.
 
 ## Verifying your module
 

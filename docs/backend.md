@@ -11,19 +11,18 @@ backend/app/
 ├── main.py        # app factory, router registration
 ├── api/           # one router per concern (session, results, ...)
 ├── core/          # config.py (loads config.yaml), orchestrator (Phase 2+)
-└── services/      # module adapters + mock implementations (Phase 1+)
+└── services/      # module adapters, mocks, and local evidence ledger
 ```
 
 ## Session & replay model
 
 One analysis session at a time (single-user prototype):
 
-1. `POST /api/session` — start a session from an uploaded PCAP/CSV or a
-   sample file. The orchestrator runs the module pipeline and prepares
-   per-window results.
+1. `POST /api/session` — process an uploaded PCAP/CSV or a sample file and
+   prepare replay states. Forecasts are not precomputed.
 2. The **replay engine** advances a simulated clock one time window per
-   `replay.seconds_per_window` seconds (`config.yaml`), so judges watch the
-   forecast evolve as if traffic were live.
+   `replay.seconds_per_window` seconds (`config.yaml`). Each newly visible
+   position runs the canonical model on its historical prefix exactly once.
 3. The dashboard polls the result endpoints below; each returns the state as
    of the current replay position.
 
@@ -43,6 +42,9 @@ backend clears it — acceptable for the prototype.
 | GET    | `/api/explanations`     | `Explanation`: top contributing features / reasons |
 | GET    | `/api/flows/flagged`    | list of `FlaggedFlow` (suspicious flows with reasons) |
 | GET    | `/api/traffic/summary`  | `TrafficSummary`: counts, protocols, top talkers |
+| GET    | `/api/alerts`            | deduplicated forecast alerts |
+| GET    | `/api/evidence`          | evidence records and ledger status |
+| GET    | `/api/evidence/{id}/verify` | recalculated hash and chain verification |
 
 Response shapes are exactly the Pydantic models in `contracts/` — FastAPI
 serializes them directly, so the contract and the API can never drift apart.

@@ -21,7 +21,7 @@ CSV, status progression, every result endpoint's shape, and error paths
 (no session yet, malformed/oversized upload, unsupported file type).
 `tests/test_health.py` (Phase 0) is the template.
 
-### 3. End-to-end mock run (`tests/test_e2e.py`) — Phase 3+
+### 3. End-to-end replay run
 
 One test: start a session on `data/samples/`, drive the replay to
 completion, assert every endpoint returns coherent data for the final
@@ -43,6 +43,8 @@ only enforce the contract boundary.
 1. Fresh clone → venv → `pip install -r requirements.txt` (offline wheel
    cache if no internet) → `pytest` green.
 2. Start backend + dashboard, load a sample file, watch a full replay.
-3. Verify every PS-required panel shows real (non-mock) data.
+3. Verify the first five positions show warm-up rather than a fabricated
+   probability, then verify real LSTM output after six windows.
+4. Let a forecast alert appear, open the evidence panel, and click Verify.
 4. Kill/restart the backend mid-replay — dashboard must degrade gracefully
    ("backend unreachable"), not crash.
