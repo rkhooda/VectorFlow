@@ -8,8 +8,6 @@ lead and land in this package first, in their own commit.
 
 from datetime import datetime
 from enum import Enum
-from typing import Any
-
 from pydantic import BaseModel, ConfigDict, Field
 
 

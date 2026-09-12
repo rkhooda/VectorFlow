@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import Any
 
 from contracts import (
-    AttackStagePrediction,
     BlockchainVerification,
     EvidenceRecord,
     Explanation,
